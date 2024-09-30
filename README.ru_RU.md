@@ -4,10 +4,10 @@
 
 **Продвинутая веб-панель • Построена на основе Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/gentslava/3x-ui/releases)
-[![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
-[![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
-[![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
+[![](https://img.shields.io/github/v/release/gentslava/3x-ui.svg)](https://github.com/gentslava/3x-ui/releases)
+[![](https://img.shields.io/github/actions/workflow/status/gentslava/3x-ui/release.yml.svg)](#)
+[![GO Version](https://img.shields.io/github/go-mod/go-version/gentslava/3x-ui.svg)](#)
+[![Downloads](https://img.shields.io/github/downloads/gentslava/3x-ui/total.svg)](#)
 [![License](https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 > **Отказ от ответственности:** Этот проект предназначен только для личного обучения и общения. Пожалуйста, не используйте его в незаконных целях и не применяйте в производственной среде.
@@ -15,7 +15,7 @@
 **Если этот проект оказался полезным для вас, вы можете оценить его, поставив звёздочку** :star2:
 
 <p align="left">
-  <a href="https://buymeacoffee.com/mhsanaei" target="_blank">
+  <a href="https://buymeacoffee.com/gentslava" target="_blank">
     <img src="./media/buymeacoffe.png" alt="Image">
   </a>
 </p>
@@ -27,7 +27,7 @@
 ## Установка и обновление
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh)
 ```
 
 ## Установка определённой версии
@@ -35,7 +35,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.
 Чтобы установить нужную вам версию, добавьте номер версии в конец команды установки. Например, `v2.4.2`:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v2.4.2
+bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh) v2.4.2
 ```
 
 ## SSL Сертификат
@@ -180,7 +180,7 @@ systemctl restart x-ui
       --network=host \
       --restart=unless-stopped \
       --name 3x-ui \
-      ghcr.io/mhsanaei/3x-ui:latest
+      ghcr.io/gentslava/3x-ui:latest
    ```
 
 4. **Обновление до последней версии:**
