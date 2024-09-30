@@ -46,7 +46,7 @@
                           :stroke-color="status.cpu.color"
                           :percent="status.cpu.percent"></a-progress>
                         <div><b>CPU:</b> [[ cpuCoreFormat(status.cpuCores) ]] <a-tooltip>
-                          <a-icon type="area-chart"></a-icon> 
+                          <a-icon type="area-chart"></a-icon>
                           <template slot="title">
                             <div><b>Logical Processors:</b> [[ (status.logicalPro) ]]</div>
                             <div><b>Speed:</b> [[ cpuSpeedFormat(status.cpuSpeedMhz) ]]</div>
@@ -92,7 +92,7 @@
               <a-col :sm="24" :lg="12">
                 <a-card hoverable>
                   <b>3X-UI:</b>
-                  <a rel="noopener" href="https://github.com/MHSanaei/3x-ui/releases" target="_blank"><a-tag color="green">v{{ .cur_ver }}</a-tag></a>
+                  <a rel="noopener" href="https://github.com/gentslava/3x-ui/releases" target="_blank"><a-tag color="green">v{{ .cur_ver }}</a-tag></a>
                   <a rel="noopener" href="https://t.me/XrayUI" target="_blank"><a-tag color="green">@XrayUI</a-tag></a>
                 </a-card>
               </a-col>
@@ -445,7 +445,7 @@
         loading: false,
         show(logs) {
             this.visible = true;
-            this.logs = logs; 
+            this.logs = logs;
             this.formattedLogs = this.logs?.length > 0 ? this.formatLogs(this.logs) : "No Record...";
         },
         formatLogs(logs) {
