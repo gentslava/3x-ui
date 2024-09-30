@@ -135,7 +135,7 @@ before_show_menu() {
 }
 
 install() {
-    bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/main/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/main/install.sh)
     if [[ $? == 0 ]]; then
         if [[ $# == 0 ]]; then
             start
@@ -154,7 +154,7 @@ update() {
         fi
         return 0
     fi
-    bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/main/install.sh)
+    bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/main/install.sh)
     if [[ $? == 0 ]]; then
         LOGI "Update is complete, Panel has automatically restarted "
         exit 0
@@ -171,11 +171,11 @@ update_menu() {
         fi
         return 0
     fi
-    
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/MHSanaei/3x-ui/main/x-ui.sh
+
+    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/gentslava/3x-ui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
-    
+
      if [[ $? == 0 ]]; then
         echo -e "${green}Update successful. The panel has automatically restarted.${plain}"
         exit 0
@@ -264,18 +264,18 @@ gen_random_string() {
 
 reset_webbasepath() {
     echo -e "${yellow}Resetting Web Base Path${plain}"
-    
+
     # Prompt user to set a new web base path
     read -rp "Please set the new web base path [press 'y' for a random path]: " config_webBasePath
-    
+
     if [[ $config_webBasePath == "y" ]]; then
         config_webBasePath=$(gen_random_string 10)
     fi
-    
+
     # Apply the new web base path setting
     /usr/local/x-ui/x-ui setting -webBasePath "${config_webBasePath}" >/dev/null 2>&1
     systemctl restart x-ui
-    
+
     # Display confirmation message
     echo -e "Web base path has been reset to: ${green}${config_webBasePath}${plain}"
     echo -e "${green}Please use the new web base path to access the panel.${plain}"
@@ -506,7 +506,7 @@ enable_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/MHSanaei/3x-ui/raw/main/x-ui.sh
+    wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/gentslava/3x-ui/raw/main/x-ui.sh
     if [[ $? != 0 ]]; then
         echo ""
         LOGE "Failed to download script, Please check whether the machine can connect Github"
@@ -720,7 +720,7 @@ delete_ports() {
     done
 
     # Confirm that the ports are deleted
-    
+
     echo "Deleted the specified ports:"
     for port in "${PORT_LIST[@]}"; do
         if [[ $port == *-* ]]; then
@@ -1328,7 +1328,7 @@ show_menu() {
   ${green}20.${plain} IP Limit Management
   ${green}21.${plain} Firewall Management
 ————————————————
-  ${green}22.${plain} Enable BBR 
+  ${green}22.${plain} Enable BBR
   ${green}23.${plain} Update Geo Files
   ${green}24.${plain} Speedtest by Ookla
 "

@@ -4,7 +4,7 @@
 
 **Продвинутая веб-панель • Построена на основе Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
+[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/gentslava/3x-ui/releases)
 [![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
 [![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
 [![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
@@ -110,7 +110,7 @@ case "${ARCH}" in
 esac
 
 
-wget https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
+wget https://github.com/gentslava/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
 ```
 
 2. После загрузки архива выполните следующие команды для установки или обновления x-ui:
@@ -158,7 +158,7 @@ systemctl restart x-ui
 2. **Склонируйте репозиторий проекта:**
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/gentslava/3x-ui.git
    cd 3x-ui
    ```
 
@@ -215,7 +215,7 @@ location / {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -223,7 +223,7 @@ location / {
 
 #### Nginx sub-path
 - Убедитесь, что "корневой путь URL адреса панели" в настройках панели и `/sub` совпадают.
-- В настройках панели `url` должен заканчиваться на `/`.    
+- В настройках панели `url` должен заканчиваться на `/`.
 
 ```nginx
 location /sub {
@@ -232,7 +232,7 @@ location /sub {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -556,4 +556,4 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 
 ## Число звёзд со временем
 
-[![Stargazers over time](https://starchart.cc/MHSanaei/3x-ui.svg)](https://starchart.cc/MHSanaei/3x-ui)
+[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg)](https://starchart.cc/gentslava/3x-ui)
