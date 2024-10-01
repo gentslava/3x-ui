@@ -32,7 +32,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install
 
 ## Install Custom Version
 
-To install your desired version, add the version to the end of the installation command. e.g., ver `v2.4.2`:
+To install your desired version, add the version to the end of the installation command. e.g., ver `v2.4.3`:
 
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh) v2.4.2
