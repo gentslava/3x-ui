@@ -30,12 +30,12 @@
 bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh)
 ```
 
-## Установка определённой версии (мы не рекомендуем)
+## Установить старую версию (мы не рекомендуем)
 
 Чтобы установить желаемую версию, используйте следующую команду установки. Например, ver `v1.7.9`:
 
 ```
-VERSION=v1.7.9 bash <(curl -Ls "https://raw.githubusercontent.com/gentslava/3x-ui/refs/tags/$VERSION/install.sh") $VERSION
+VERSION=v1.7.9 && bash <(curl -Ls "https://raw.githubusercontent.com/gentslava/3x-ui/$VERSION/install.sh") $VERSION
 ```
 
 ## SSL Сертификат
@@ -257,6 +257,7 @@ location /sub {
 - Oracle Linux 8+
 - OpenSUSE Tubleweed
 - Amazon Linux 2023
+- Windows x64
 
 ## Поддерживаемые архитектуры и устройства
 
@@ -481,7 +482,7 @@ WARP встроен, и дополнительная установка не т�
 
 #### Использование
 
-- [API документация](https://documenter.getpostman.com/view/5146551/2sAXxP8Y12)
+- [API документация](https://www.postman.com/hsanaei/3x-ui/collection/q1l5l0u/3x-ui)
 - `/login` с `POST`-данными: `{username: '', password: ''}` для входа
 - `/panel/api/inbounds` это базовый путь для следующих действий:
 
@@ -515,7 +516,7 @@ WARP встроен, и дополнительная установка не т�
 </details>
 
 
-- [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://god.gw.postman.com/run-collection/5146551-e6aac565-e0e2-46df-acff-2607a51bbd04?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D5146551-e6aac565-e0e2-46df-acff-2607a51bbd04%26entityType%3Dcollection%26workspaceId%3Dd64f609f-485a-4951-9b8f-876b3f917124)
+- [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/5146551-dda3cab3-0e33-485f-96f9-d4262f437ac5?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D5146551-dda3cab3-0e33-485f-96f9-d4262f437ac5%26entityType%3Dcollection%26workspaceId%3Dd64f609f-485a-4951-9b8f-876b3f917124)
 </details>
 
 ## Переменные среды
