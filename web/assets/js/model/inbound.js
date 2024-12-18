@@ -34,10 +34,6 @@ const TLS_VERSION_OPTION = {
 };
 
 const TLS_CIPHER_OPTION = {
-    RSA_AES_128_CBC: "TLS_RSA_WITH_AES_128_CBC_SHA",
-    RSA_AES_256_CBC: "TLS_RSA_WITH_AES_256_CBC_SHA",
-    RSA_AES_128_GCM: "TLS_RSA_WITH_AES_128_GCM_SHA256",
-    RSA_AES_256_GCM: "TLS_RSA_WITH_AES_256_GCM_SHA384",
     AES_128_GCM: "TLS_AES_128_GCM_SHA256",
     AES_256_GCM: "TLS_AES_256_GCM_SHA384",
     CHACHA20_POLY1305: "TLS_CHACHA20_POLY1305_SHA256",
@@ -64,6 +60,7 @@ const UTLS_FINGERPRINT = {
     UTLS_QQ: "qq",
     UTLS_RANDOM: "random",
     UTLS_RANDOMIZED: "randomized",
+    UTLS_UNSAFE: "unsafe",
 };
 
 const ALPN_OPTION = {
@@ -692,7 +689,10 @@ TlsStreamSettings.Cert = class extends XrayCommonClass {
 };
 
 TlsStreamSettings.Settings = class extends XrayCommonClass {
-    constructor(allowInsecure = false, fingerprint = '') {
+    constructor(
+        allowInsecure = false,
+        fingerprint = UTLS_FINGERPRINT.UTLS_CHROME,
+    ) {
         super();
         this.allowInsecure = allowInsecure;
         this.fingerprint = fingerprint;
@@ -781,7 +781,7 @@ class RealityStreamSettings extends XrayCommonClass {
 RealityStreamSettings.Settings = class extends XrayCommonClass {
     constructor(
         publicKey = '',
-        fingerprint = UTLS_FINGERPRINT.UTLS_RANDOM,
+        fingerprint = UTLS_FINGERPRINT.UTLS_CHROME,
         serverName = '',
         spiderX = '/'
     ) {
