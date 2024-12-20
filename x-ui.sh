@@ -1310,7 +1310,7 @@ EOF
 
     cat << EOF > /etc/fail2ban/action.d/3x-ipl.conf
 [INCLUDES]
-before = iptables-common.conf
+before = iptables-allports.conf
 
 [Definition]
 actionstart = <iptables> -N f2b-<name>
@@ -1391,7 +1391,7 @@ iplimit_main() {
     3)
         confirm "Proceed with Unbanning everyone from IP Limit jail?" "y"
         if [[ $? == 0 ]]; then
-            systemctl restart fail2ban
+            fail2ban-client reload --restart --unban 3x-ipl
             truncate -s 0 "${iplimit_banned_log_path}"
             echo -e "${green}All users Unbanned successfully.${plain}"
             iplimit_main
