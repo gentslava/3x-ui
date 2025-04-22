@@ -42,7 +42,7 @@
   .dark .ant-radio-checked .ant-radio-inner {
     border-color: var(--color-primary-100);
   }
-  .dark .ant-backup-list, 
+  .dark .ant-backup-list,
   .dark .ant-xray-version-list,
   .dark .ant-card-actions,
   .dark .ant-card-actions>li:not(:last-child) {
@@ -109,9 +109,9 @@
                               :stroke-color="status.cpu.color"
                               :percent="status.cpu.percent"></a-progress>
                             <div>
-                              <b>{{ i18n "pages.index.cpu" }}:</b> [[ CPUFormatter.cpuCoreFormat(status.cpuCores) ]] 
+                              <b>{{ i18n "pages.index.cpu" }}:</b> [[ CPUFormatter.cpuCoreFormat(status.cpuCores) ]]
                               <a-tooltip>
-                                <a-icon type="area-chart"></a-icon> 
+                                <a-icon type="area-chart"></a-icon>
                                 <template slot="title">
                                   <div><b>{{ i18n "pages.index.logicalProcessors" }}:</b> [[ (status.logicalPro) ]]</div>
                                   <div><b>{{ i18n "pages.index.frequency" }}:</b> [[ CPUFormatter.cpuSpeedFormat(status.cpuSpeedMhz) ]]</div>
@@ -223,7 +223,7 @@
                 </a-col>
                 <a-col :sm="24" :lg="12">
                   <a-card title='3X-UI' hoverable>
-                    <a rel="noopener" href="https://github.com/MHSanaei/3x-ui/releases" target="_blank"><a-tag color="green">v{{ .cur_ver }}</a-tag></a>
+                    <a rel="noopener" href="https://github.com/gentslava/3x-ui/releases" target="_blank"><a-tag color="green">v{{ .cur_ver }}</a-tag></a>
                     <a rel="noopener" href="https://t.me/XrayUI" target="_blank"><a-tag color="green">@XrayUI</a-tag></a>
                   </a-card>
                 </a-col>
@@ -405,8 +405,8 @@
       </a-form>
       <div class="ant-input" :style="{ height: 'auto', maxHeight: '500px', overflow: 'auto', marginTop: '0.5rem' }" v-html="logModal.formattedLogs"></div>
     </a-modal>
-    <a-modal id="backup-modal" 
-        v-model="backupModal.visible" 
+    <a-modal id="backup-modal"
+        v-model="backupModal.visible"
         title='{{ i18n "pages.index.backupTitle" }}'
         :closable="true"
         footer=""
@@ -546,7 +546,7 @@
         loading: false,
         show(logs) {
             this.visible = true;
-            this.logs = logs; 
+            this.logs = logs;
             this.formattedLogs = this.logs?.length > 0 ? this.formatLogs(this.logs) : "No Record...";
         },
         formatLogs(logs) {
