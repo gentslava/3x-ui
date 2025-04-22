@@ -2,6 +2,7 @@
 
 red='\033[0;31m'
 green='\033[0;32m'
+blue='\033[0;34m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
@@ -32,79 +33,10 @@ else
     echo "Failed to check the system OS, please contact the author!" >&2
     exit 1
 fi
-
 echo "The OS release is: $release"
 
 os_version=""
 os_version=$(grep "^VERSION_ID" /etc/os-release | cut -d '=' -f2 | tr -d '"' | tr -d '.')
-
-if [[ "${release}" == "arch" ]]; then
-    echo "Your OS is Arch Linux"
-elif [[ "${release}" == "parch" ]]; then
-    echo "Your OS is Parch Linux"
-elif [[ "${release}" == "manjaro" ]]; then
-    echo "Your OS is Manjaro"
-elif [[ "${release}" == "armbian" ]]; then
-    echo "Your OS is Armbian"
-elif [[ "${release}" == "alpine" ]]; then
-    echo "Your OS is Alpine Linux"
-elif [[ "${release}" == "opensuse-tumbleweed" ]]; then
-    echo "Your OS is OpenSUSE Tumbleweed"
-elif [[ "${release}" == "openEuler" ]]; then
-    if [[ ${os_version} -lt 2203 ]]; then
-        echo -e "${red} Please use OpenEuler 22.03 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "centos" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use CentOS 8 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ubuntu" ]]; then
-    if [[ ${os_version} -lt 2004 ]]; then
-        echo -e "${red} Please use Ubuntu 20 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "fedora" ]]; then
-    if [[ ${os_version} -lt 36 ]]; then
-        echo -e "${red} Please use Fedora 36 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "amzn" ]]; then
-    if [[ ${os_version} != "2023" ]]; then
-        echo -e "${red} Please use Amazon Linux 2023!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "debian" ]]; then
-    if [[ ${os_version} -lt 11 ]]; then
-        echo -e "${red} Please use Debian 11 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "almalinux" ]]; then
-    if [[ ${os_version} -lt 80 ]]; then
-        echo -e "${red} Please use AlmaLinux 8.0 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "rocky" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Rocky Linux 8 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ol" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Oracle Linux 8 or higher ${plain}\n" && exit 1
-    fi
-else
-    echo -e "${red}Your operating system is not supported by this script.${plain}\n"
-    echo "Please ensure you are using one of the following supported operating systems:"
-    echo "- Ubuntu 20.04+"
-    echo "- Debian 11+"
-    echo "- CentOS 8+"
-    echo "- OpenEuler 22.03+"
-    echo "- Fedora 36+"
-    echo "- Arch Linux"
-    echo "- Parch Linux"
-    echo "- Manjaro"
-    echo "- Armbian"
-    echo "- AlmaLinux 8.0+"
-    echo "- Rocky Linux 8+"
-    echo "- Oracle Linux 8+"
-    echo "- OpenSUSE Tumbleweed"
-    echo "- Amazon Linux 2023"
-    exit 1
-fi
 
 # Declare Variables
 log_folder="${XUI_LOG_FOLDER:=/var/log}"
@@ -113,12 +45,12 @@ iplimit_banned_log_path="${log_folder}/3xipl-banned.log"
 
 confirm() {
     if [[ $# > 1 ]]; then
-        echo && read -p "$1 [Default $2]: " temp
+        echo && read -rp "$1 [Default $2]: " temp
         if [[ "${temp}" == "" ]]; then
             temp=$2
         fi
     else
-        read -p "$1 [y/n]: " temp
+        read -rp "$1 [y/n]: " temp
     fi
     if [[ "${temp}" == "y" || "${temp}" == "Y" ]]; then
         return 0
@@ -179,13 +111,13 @@ update_menu() {
         return 0
     fi
 
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/gentslava/3x-ui/main/x-ui.sh
+    wget -O /usr/bin/x-ui https://raw.githubusercontent.com/gentslava/3x-ui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
 
     if [[ $? == 0 ]]; then
         echo -e "${green}Update successful. The panel has automatically restarted.${plain}"
-        before_show_menu
+        exit 0
     else
         echo -e "${red}Failed to update the menu.${plain}"
         return 1
@@ -430,7 +362,7 @@ show_log() {
     echo -e "${green}\t1.${plain} Debug Log"
     echo -e "${green}\t2.${plain} Clear All logs"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
 
     case "$choice" in
     0)
@@ -439,7 +371,7 @@ show_log() {
     1)
         journalctl -u x-ui -e --no-pager -f -p debug
         if [[ $# == 0 ]]; then
-        before_show_menu
+            before_show_menu
         fi
         ;;
     2)
@@ -490,7 +422,7 @@ bbr_menu() {
     echo -e "${green}\t1.${plain} Enable BBR"
     echo -e "${green}\t2.${plain} Disable BBR"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
     case "$choice" in
     0)
         show_menu
@@ -546,7 +478,7 @@ enable_bbr() {
     centos | almalinux | rocky | ol)
         yum -y update && yum -y install ca-certificates
         ;;
-    fedora | amzn)
+    fedora | amzn | virtuozzo)
         dnf -y update && dnf -y install ca-certificates
         ;;
     arch | manjaro | parch)
@@ -574,7 +506,7 @@ enable_bbr() {
 }
 
 update_shell() {
-    wget -O /usr/bin/x-ui -N --no-check-certificate https://github.com/gentslava/3x-ui/raw/main/x-ui.sh
+    wget -O /usr/bin/x-ui -N https://github.com/gentslava/3x-ui/raw/main/x-ui.sh
     if [[ $? != 0 ]]; then
         echo ""
         LOGE "Failed to download script, Please check whether the machine can connect Github"
@@ -682,30 +614,45 @@ show_xray_status() {
 }
 
 firewall_menu() {
-    echo -e "${green}\t1.${plain} Install Firewall & open ports"
-    echo -e "${green}\t2.${plain} Allowed List"
-    echo -e "${green}\t3.${plain} Delete Ports from List"
-    echo -e "${green}\t4.${plain} Disable Firewall"
+    echo -e "${green}\t1.${plain} ${green}Install${plain} Firewall"
+    echo -e "${green}\t2.${plain} Port List [numbered]"
+    echo -e "${green}\t3.${plain} ${green}Open${plain} Ports"
+    echo -e "${green}\t4.${plain} ${red}Delete${plain} Ports from List"
+    echo -e "${green}\t5.${plain} ${green}Enable${plain} Firewall"
+    echo -e "${green}\t6.${plain} ${red}Disable${plain} Firewall"
+    echo -e "${green}\t7.${plain} Firewall Status"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
     case "$choice" in
     0)
         show_menu
         ;;
     1)
-        open_ports
+        install_firewall
         firewall_menu
         ;;
     2)
-        sudo ufw status
+        ufw status numbered
         firewall_menu
         ;;
     3)
-        delete_ports
+        open_ports
         firewall_menu
         ;;
     4)
-        sudo ufw disable
+        delete_ports
+        firewall_menu
+        ;;
+    5)
+        ufw enable
+        firewall_menu
+        ;;
+    6)
+        ufw disable
+        firewall_menu
+        ;;
+    7)
+        ufw status verbose
         firewall_menu
         ;;
     *)
@@ -715,7 +662,7 @@ firewall_menu() {
     esac
 }
 
-open_ports() {
+install_firewall() {
     if ! command -v ufw &>/dev/null; then
         echo "ufw firewall is not installed. Installing now..."
         apt-get update
@@ -733,14 +680,17 @@ open_ports() {
         ufw allow ssh
         ufw allow http
         ufw allow https
-        ufw allow 2053/tcp
+        ufw allow 2053/tcp #webPort
+        ufw allow 2096/tcp #subport
 
         # Enable the firewall
         ufw --force enable
     fi
+}
 
-    # Prompt the user to enter a list of ports
-    read -p "Enter the ports you want to open (e.g. 80,443,2053 or range 400-500): " ports
+open_ports() {
+    # Prompt the user to enter the ports they want to open
+    read -rp "Enter the ports you want to open (e.g. 80,443,2053 or range 400-500): " ports
 
     # Check if the input is valid
     if ! [[ $ports =~ ^([0-9]+|[0-9]+-[0-9]+)(,([0-9]+|[0-9]+-[0-9]+))*$ ]]; then
@@ -755,68 +705,111 @@ open_ports() {
             # Split the range into start and end ports
             start_port=$(echo $port | cut -d'-' -f1)
             end_port=$(echo $port | cut -d'-' -f2)
+            # Open the port range
             ufw allow $start_port:$end_port/tcp
             ufw allow $start_port:$end_port/udp
         else
+            # Open the single port
             ufw allow "$port"
         fi
     done
 
-    # Confirm that the ports are open
-    echo "The following ports are now open:"
-    ufw status | grep "ALLOW" | grep -Eo "[0-9]+(/[a-z]+)?"
-
-    echo "Firewall status:"
-    ufw status verbose
+    # Confirm that the ports are opened
+    echo "Opened the specified ports:"
+    for port in "${PORT_LIST[@]}"; do
+        if [[ $port == *-* ]]; then
+            start_port=$(echo $port | cut -d'-' -f1)
+            end_port=$(echo $port | cut -d'-' -f2)
+            # Check if the port range has been successfully opened
+            (ufw status | grep -q "$start_port:$end_port") && echo "$start_port-$end_port"
+        else
+            # Check if the individual port has been successfully opened
+            (ufw status | grep -q "$port") && echo "$port"
+        fi
+    done
 }
 
 delete_ports() {
-    # Prompt the user to enter the ports they want to delete
-    read -p "Enter the ports you want to delete (e.g. 80,443,2053 or range 400-500): " ports
+    # Display current rules with numbers
+    echo "Current UFW rules:"
+    ufw status numbered
 
-    # Check if the input is valid
-    if ! [[ $ports =~ ^([0-9]+|[0-9]+-[0-9]+)(,([0-9]+|[0-9]+-[0-9]+))*$ ]]; then
-        echo "Error: Invalid input. Please enter a comma-separated list of ports or a range of ports (e.g. 80,443,2053 or 400-500)." >&2
+    # Ask the user how they want to delete rules
+    echo "Do you want to delete rules by:"
+    echo "1) Rule numbers"
+    echo "2) Ports"
+    read -rp "Enter your choice (1 or 2): " choice
+
+    if [[ $choice -eq 1 ]]; then
+        # Deleting by rule numbers
+        read -rp "Enter the rule numbers you want to delete (1, 2, etc.): " rule_numbers
+
+        # Validate the input
+        if ! [[ $rule_numbers =~ ^([0-9]+)(,[0-9]+)*$ ]]; then
+            echo "Error: Invalid input. Please enter a comma-separated list of rule numbers." >&2
+            exit 1
+        fi
+
+        # Split numbers into an array
+        IFS=',' read -ra RULE_NUMBERS <<<"$rule_numbers"
+        for rule_number in "${RULE_NUMBERS[@]}"; do
+            # Delete the rule by number
+            ufw delete "$rule_number" || echo "Failed to delete rule number $rule_number"
+        done
+
+        echo "Selected rules have been deleted."
+
+    elif [[ $choice -eq 2 ]]; then
+        # Deleting by ports
+        read -rp "Enter the ports you want to delete (e.g. 80,443,2053 or range 400-500): " ports
+
+        # Validate the input
+        if ! [[ $ports =~ ^([0-9]+|[0-9]+-[0-9]+)(,([0-9]+|[0-9]+-[0-9]+))*$ ]]; then
+            echo "Error: Invalid input. Please enter a comma-separated list of ports or a range of ports (e.g. 80,443,2053 or 400-500)." >&2
+            exit 1
+        fi
+
+        # Split ports into an array
+        IFS=',' read -ra PORT_LIST <<<"$ports"
+        for port in "${PORT_LIST[@]}"; do
+            if [[ $port == *-* ]]; then
+                # Split the port range
+                start_port=$(echo $port | cut -d'-' -f1)
+                end_port=$(echo $port | cut -d'-' -f2)
+                # Delete the port range
+                ufw delete allow $start_port:$end_port/tcp
+                ufw delete allow $start_port:$end_port/udp
+            else
+                # Delete a single port
+                ufw delete allow "$port"
+            fi
+        done
+
+        # Confirmation of deletion
+        echo "Deleted the specified ports:"
+        for port in "${PORT_LIST[@]}"; do
+            if [[ $port == *-* ]]; then
+                start_port=$(echo $port | cut -d'-' -f1)
+                end_port=$(echo $port | cut -d'-' -f2)
+                # Check if the port range has been deleted
+                (ufw status | grep -q "$start_port:$end_port") || echo "$start_port-$end_port"
+            else
+                # Check if the individual port has been deleted
+                (ufw status | grep -q "$port") || echo "$port"
+            fi
+        done
+    else
+        echo "${red}Error:${plain} Invalid choice. Please enter 1 or 2." >&2
         exit 1
     fi
-
-    # Delete the specified ports using ufw
-    IFS=',' read -ra PORT_LIST <<<"$ports"
-    for port in "${PORT_LIST[@]}"; do
-        if [[ $port == *-* ]]; then
-            # Split the range into start and end ports
-            start_port=$(echo $port | cut -d'-' -f1)
-            end_port=$(echo $port | cut -d'-' -f2)
-            # Delete the port range
-            ufw delete allow $start_port:$end_port/tcp
-            ufw delete allow $start_port:$end_port/udp
-        else
-            ufw delete allow "$port"
-        fi
-    done
-
-    # Confirm that the ports are deleted
-
-    echo "Deleted the specified ports:"
-    for port in "${PORT_LIST[@]}"; do
-        if [[ $port == *-* ]]; then
-            start_port=$(echo $port | cut -d'-' -f1)
-            end_port=$(echo $port | cut -d'-' -f2)
-            # Check if the port range has been successfully deleted
-            (ufw status | grep -q "$start_port:$end_port") || echo "$start_port-$end_port"
-        else
-            # Check if the individual port has been successfully deleted
-            (ufw status | grep -q "$port") || echo "$port"
-        fi
-    done
 }
 
 update_geo() {
     echo -e "${green}\t1.${plain} Loyalsoldier (geoip.dat, geosite.dat)"
     echo -e "${green}\t2.${plain} chocolate4u (geoip_IR.dat, geosite_IR.dat)"
-    echo -e "${green}\t3.${plain} vuong2023 (geoip_VN.dat, geosite_VN.dat)"
+    echo -e "${green}\t3.${plain} runetfreedom (geoip_RU.dat, geosite_RU.dat)"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
 
     cd /usr/local/x-ui/bin
 
@@ -842,10 +835,10 @@ update_geo() {
         ;;
     3)
         systemctl stop x-ui
-        rm -f geoip_VN.dat geosite_VN.dat
-        wget -O geoip_VN.dat -N https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geoip.dat
-        wget -O geosite_VN.dat -N https://github.com/vuong2023/vn-v2ray-rules/releases/latest/download/geosite.dat
-        echo -e "${green}vuong2023 datasets have been updated successfully!${plain}"
+        rm -f geoip_RU.dat geosite_RU.dat
+        wget -O geoip_RU.dat -N https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geoip.dat
+        wget -O geosite_RU.dat -N https://github.com/runetfreedom/russia-v2ray-rules-dat/releases/latest/download/geosite.dat
+        echo -e "${green}runetfreedom datasets have been updated successfully!${plain}"
         restart
         ;;
     *)
@@ -886,7 +879,7 @@ ssl_cert_issue_main() {
     echo -e "${green}\t5.${plain} Set Cert paths for the panel"
     echo -e "${green}\t0.${plain} Back to Main Menu"
 
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
     case "$choice" in
     0)
         show_menu
@@ -902,7 +895,7 @@ ssl_cert_issue_main() {
         else
             echo "Existing domains:"
             echo "$domains"
-            read -p "Please enter a domain from the list to revoke the certificate: " domain
+            read -rp "Please enter a domain from the list to revoke the certificate: " domain
             if echo "$domains" | grep -qw "$domain"; then
                 ~/.acme.sh/acme.sh --revoke -d ${domain}
                 LOGI "Certificate revoked for domain: $domain"
@@ -919,7 +912,7 @@ ssl_cert_issue_main() {
         else
             echo "Existing domains:"
             echo "$domains"
-            read -p "Please enter a domain from the list to renew the SSL certificate: " domain
+            read -rp "Please enter a domain from the list to renew the SSL certificate: " domain
             if echo "$domains" | grep -qw "$domain"; then
                 ~/.acme.sh/acme.sh --renew -d ${domain} --force
                 LOGI "Certificate forcefully renewed for domain: $domain"
@@ -956,7 +949,7 @@ ssl_cert_issue_main() {
         else
             echo "Available domains:"
             echo "$domains"
-            read -p "Please choose a domain to set the panel paths: " domain
+            read -rp "Please choose a domain to set the panel paths: " domain
 
             if echo "$domains" | grep -qw "$domain"; then
                 local webCertFile="/root/cert/${domain}/fullchain.pem"
@@ -1006,7 +999,7 @@ ssl_cert_issue() {
     centos | almalinux | rocky | ol)
         yum -y update && yum -y install socat
         ;;
-    fedora | amzn)
+    fedora | amzn | virtuozzo)
         dnf -y update && dnf -y install socat
         ;;
     arch | manjaro | parch)
@@ -1026,7 +1019,7 @@ ssl_cert_issue() {
 
     # get the domain here, and we need to verify it
     local domain=""
-    read -p "Please enter your domain name: " domain
+    read -rp "Please enter your domain name: " domain
     LOGD "Your domain is: ${domain}, checking it..."
 
     # check if there already exists a certificate
@@ -1051,7 +1044,7 @@ ssl_cert_issue() {
 
     # get the port number for the standalone server
     local WebPort=80
-    read -p "Please choose which port to use (default is 80): " WebPort
+    read -rp "Please choose which port to use (default is 80): " WebPort
     if [[ ${WebPort} -gt 65535 || ${WebPort} -lt 1 ]]; then
         LOGE "Your input ${WebPort} is invalid, will use default port 80."
         WebPort=80
@@ -1060,7 +1053,7 @@ ssl_cert_issue() {
 
     # issue the certificate
     ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    ~/.acme.sh/acme.sh --issue -d ${domain} --listen-v6 --standalone --httpport ${WebPort}
+    ~/.acme.sh/acme.sh --issue -d ${domain} --listen-v6 --standalone --httpport ${WebPort} --force
     if [ $? -ne 0 ]; then
         LOGE "Issuing certificate failed, please check logs."
         rm -rf ~/.acme.sh/${domain}
@@ -1069,10 +1062,36 @@ ssl_cert_issue() {
         LOGE "Issuing certificate succeeded, installing certificates..."
     fi
 
+    reloadCmd="x-ui restart"
+
+    LOGI "Default --reloadcmd for ACME is: ${yellow}x-ui restart"
+    LOGI "This command will run on every certificate issue and renew."
+    read -rp "Would you like to modify --reloadcmd for ACME? (y/n): " setReloadcmd
+    if [[ "$setReloadcmd" == "y" || "$setReloadcmd" == "Y" ]]; then
+        echo -e "\n${green}\t1.${plain} Preset: systemctl reload nginx ; x-ui restart"
+        echo -e "${green}\t2.${plain} Input your own command"
+        echo -e "${green}\t0.${plain} Keep default reloadcmd"
+        read -rp "Choose an option: " choice
+        case "$choice" in
+        1)
+            LOGI "Reloadcmd is: systemctl reload nginx ; x-ui restart"
+            reloadCmd="systemctl reload nginx ; x-ui restart"
+            ;;
+        2)
+            LOGD "It's recommended to put x-ui restart at the end, so it won't raise an error if other services fails"
+            read -rp "Please enter your reloadcmd (example: systemctl reload nginx ; x-ui restart): " reloadCmd
+            LOGI "Your reloadcmd is: ${reloadCmd}"
+            ;;
+        *)
+            LOGI "Keep default reloadcmd"
+            ;;
+        esac
+    fi
+
     # install the certificate
     ~/.acme.sh/acme.sh --installcert -d ${domain} \
         --key-file /root/cert/${domain}/privkey.pem \
-        --fullchain-file /root/cert/${domain}/fullchain.pem
+        --fullchain-file /root/cert/${domain}/fullchain.pem --reloadcmd "${reloadCmd}"
 
     if [ $? -ne 0 ]; then
         LOGE "Installing certificate failed, exiting."
@@ -1096,7 +1115,7 @@ ssl_cert_issue() {
     fi
 
     # Prompt user to set panel paths after successful certificate installation
-    read -p "Would you like to set this certificate for the panel? (y/n): " setPanel
+    read -rp "Would you like to set this certificate for the panel? (y/n): " setPanel
     if [[ "$setPanel" == "y" || "$setPanel" == "Y" ]]; then
         local webCertFile="/root/cert/${domain}/fullchain.pem"
         local webKeyFile="/root/cert/${domain}/privkey.pem"
@@ -1141,27 +1160,20 @@ ssl_cert_issue_CF() {
         fi
 
         CF_Domain=""
-        certPath="/root/cert-CF"
-        if [ ! -d "$certPath" ]; then
-            mkdir -p $certPath
-        else
-            rm -rf $certPath
-            mkdir -p $certPath
-        fi
 
         LOGD "Please set a domain name:"
-        read -p "Input your domain here: " CF_Domain
+        read -rp "Input your domain here: " CF_Domain
         LOGD "Your domain name is set to: ${CF_Domain}"
 
         # Set up Cloudflare API details
         CF_GlobalKey=""
         CF_AccountEmail=""
         LOGD "Please set the API key:"
-        read -p "Input your key here: " CF_GlobalKey
+        read -rp "Input your key here: " CF_GlobalKey
         LOGD "Your API key is: ${CF_GlobalKey}"
 
         LOGD "Please set up registered email:"
-        read -p "Input your email here: " CF_AccountEmail
+        read -rp "Input your email here: " CF_AccountEmail
         LOGD "Your registered email address is: ${CF_AccountEmail}"
 
         # Set the default CA to Let's Encrypt
@@ -1175,7 +1187,7 @@ ssl_cert_issue_CF() {
         export CF_Email="${CF_AccountEmail}"
 
         # Issue the certificate using Cloudflare DNS
-        ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${CF_Domain} -d *.${CF_Domain} --log
+        ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${CF_Domain} -d *.${CF_Domain} --log --force
         if [ $? -ne 0 ]; then
             LOGE "Certificate issuance failed, script exiting..."
             exit 1
@@ -1183,16 +1195,46 @@ ssl_cert_issue_CF() {
             LOGI "Certificate issued successfully, Installing..."
         fi
 
-        # Install the certificate
-        mkdir -p ${certPath}/${CF_Domain}
+         # Install the certificate
+        certPath="/root/cert/${CF_Domain}"
+        if [ -d "$certPath" ]; then
+            rm -rf ${certPath}
+        fi
+
+        mkdir -p ${certPath}
         if [ $? -ne 0 ]; then
-            LOGE "Failed to create directory: ${certPath}/${CF_Domain}"
+            LOGE "Failed to create directory: ${certPath}"
             exit 1
         fi
 
+        reloadCmd="x-ui restart"
+
+        LOGI "Default --reloadcmd for ACME is: ${yellow}x-ui restart"
+        LOGI "This command will run on every certificate issue and renew."
+        read -rp "Would you like to modify --reloadcmd for ACME? (y/n): " setReloadcmd
+        if [[ "$setReloadcmd" == "y" || "$setReloadcmd" == "Y" ]]; then
+            echo -e "\n${green}\t1.${plain} Preset: systemctl reload nginx ; x-ui restart"
+            echo -e "${green}\t2.${plain} Input your own command"
+            echo -e "${green}\t0.${plain} Keep default reloadcmd"
+            read -rp "Choose an option: " choice
+            case "$choice" in
+            1)
+                LOGI "Reloadcmd is: systemctl reload nginx ; x-ui restart"
+                reloadCmd="systemctl reload nginx ; x-ui restart"
+                ;;
+            2)
+                LOGD "It's recommended to put x-ui restart at the end, so it won't raise an error if other services fails"
+                read -rp "Please enter your reloadcmd (example: systemctl reload nginx ; x-ui restart): " reloadCmd
+                LOGI "Your reloadcmd is: ${reloadCmd}"
+                ;;
+            *)
+                LOGI "Keep default reloadcmd"
+                ;;
+            esac
+        fi
         ~/.acme.sh/acme.sh --installcert -d ${CF_Domain} -d *.${CF_Domain} \
-            --fullchain-file ${certPath}/${CF_Domain}/fullchain.pem \
-            --key-file ${certPath}/${CF_Domain}/privkey.pem
+            --key-file ${certPath}/privkey.pem \
+            --fullchain-file ${certPath}/fullchain.pem --reloadcmd "${reloadCmd}"
 
         if [ $? -ne 0 ]; then
             LOGE "Certificate installation failed, script exiting..."
@@ -1208,15 +1250,15 @@ ssl_cert_issue_CF() {
             exit 1
         else
             LOGI "The certificate is installed and auto-renewal is turned on. Specific information is as follows:"
-            ls -lah ${certPath}/${CF_Domain}
-            chmod 755 ${certPath}/${CF_Domain}
+            ls -lah ${certPath}/*
+            chmod 755 ${certPath}/*
         fi
 
         # Prompt user to set panel paths after successful certificate installation
-        read -p "Would you like to set this certificate for the panel? (y/n): " setPanel
+        read -rp "Would you like to set this certificate for the panel? (y/n): " setPanel
         if [[ "$setPanel" == "y" || "$setPanel" == "Y" ]]; then
-            local webCertFile="${certPath}/${CF_Domain}/fullchain.pem"
-            local webKeyFile="${certPath}/${CF_Domain}/privkey.pem"
+            local webCertFile="${certPath}/fullchain.pem"
+            local webKeyFile="${certPath}/privkey.pem"
 
             if [[ -f "$webCertFile" && -f "$webKeyFile" ]]; then
                 /usr/local/x-ui/x-ui cert -webCert "$webCertFile" -webCertKey "$webKeyFile"
@@ -1353,6 +1395,11 @@ iplimit_remove_conflicts() {
     done
 }
 
+ip_validation() {
+    ipv6_regex="^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"
+    ipv4_regex="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]?|0)\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]?|0)$"
+}
+
 iplimit_main() {
     echo -e "\n${green}\t1.${plain} Install Fail2ban and configure IP Limit"
     echo -e "${green}\t2.${plain} Change Ban Duration"
@@ -1365,7 +1412,7 @@ iplimit_main() {
     echo -e "${green}\t9.${plain} Service Restart"
     echo -e "${green}\t10.${plain} Uninstall Fail2ban and IP Limit"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " choice
+    read -rp "Choose an option: " choice
     case "$choice" in
     0)
         show_menu
@@ -1406,7 +1453,8 @@ iplimit_main() {
         ;;
     5)
         read -rp "Enter the IP address you want to ban: " ban_ip
-        if [[ $ban_ip =~ ^(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))$ || $ban_ip =~ ^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})$ ]]; then
+        ip_validation
+        if [[ $ban_ip =~ $ipv4_regex || $ban_ip =~ $ipv6_regex ]]; then
             fail2ban-client set 3x-ipl banip "$ban_ip"
             echo -e "${green}IP Address ${ban_ip} has been banned successfully.${plain}"
         else
@@ -1416,7 +1464,8 @@ iplimit_main() {
         ;;
     6)
         read -rp "Enter the IP address you want to unban: " unban_ip
-        if [[ $unban_ip =~ ^(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9]))$ || $unban_ip =~ ^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})$ ]]; then
+        ip_validation
+        if [[ $unban_ip =~ $ipv4_regex || $unban_ip =~ $ipv6_regex ]]; then
             fail2ban-client set 3x-ipl unbanip "$unban_ip"
             echo -e "${green}IP Address ${unban_ip} has been unbanned successfully.${plain}"
         else
@@ -1467,7 +1516,7 @@ install_iplimit() {
             yum update -y && yum install epel-release -y
             yum -y install fail2ban
             ;;
-        fedora | amzn)
+        fedora | amzn | virtuozzo)
             dnf -y update && dnf -y install fail2ban
             ;;
         arch | manjaro | parch)
@@ -1511,7 +1560,6 @@ install_iplimit() {
     # Launching fail2ban
     if ! systemctl is-active --quiet fail2ban; then
         systemctl start fail2ban
-        systemctl enable fail2ban
     else
         systemctl restart fail2ban
     fi
@@ -1525,7 +1573,7 @@ remove_iplimit() {
     echo -e "${green}\t1.${plain} Only remove IP Limit configurations"
     echo -e "${green}\t2.${plain} Uninstall Fail2ban and IP Limit"
     echo -e "${green}\t0.${plain} Back to Main Menu"
-    read -p "Choose an option: " num
+    read -rp "Choose an option: " num
     case "$num" in
     1)
         rm -f /etc/fail2ban/filter.d/3x-ipl.conf
@@ -1548,7 +1596,7 @@ remove_iplimit() {
             yum remove fail2ban -y
             yum autoremove -y
             ;;
-        fedora | amzn)
+        fedora | amzn | virtuozzo)
             dnf remove fail2ban -y
             dnf autoremove -y
             ;;
@@ -1607,7 +1655,7 @@ SSH_port_forwarding() {
     echo -e "${green}1.${plain} Set listen IP"
     echo -e "${green}2.${plain} Clear listen IP"
     echo -e "${green}0.${plain} Back to Main Menu"
-    read -p "Choose an option: " num
+    read -rp "Choose an option: " num
 
     case "$num" in
     1)
@@ -1615,10 +1663,10 @@ SSH_port_forwarding() {
             echo -e "\nNo listenIP configured. Choose an option:"
             echo -e "1. Use default IP (127.0.0.1)"
             echo -e "2. Set a custom IP"
-            read -p "Select an option (1 or 2): " listen_choice
+            read -rp "Select an option (1 or 2): " listen_choice
 
             config_listenIP="127.0.0.1"
-            [[ "$listen_choice" == "2" ]] && read -p "Enter custom IP to listen on: " config_listenIP
+            [[ "$listen_choice" == "2" ]] && read -rp "Enter custom IP to listen on: " config_listenIP
 
             /usr/local/x-ui/x-ui setting -listenIP "${config_listenIP}" >/dev/null 2>&1
             echo -e "${green}listen IP has been set to ${config_listenIP}.${plain}"
@@ -1651,64 +1699,66 @@ SSH_port_forwarding() {
 }
 
 show_usage() {
-    echo "x-ui control menu usages: "
-    echo "------------------------------------------"
-    echo -e "SUBCOMMANDS:"
-    echo -e "x-ui              - Admin Management Script"
-    echo -e "x-ui start        - Start"
-    echo -e "x-ui stop         - Stop"
-    echo -e "x-ui restart      - Restart"
-    echo -e "x-ui status       - Current Status"
-    echo -e "x-ui settings     - Current Settings"
-    echo -e "x-ui enable       - Enable Autostart on OS Startup"
-    echo -e "x-ui disable      - Disable Autostart on OS Startup"
-    echo -e "x-ui log          - Check logs"
-    echo -e "x-ui banlog       - Check Fail2ban ban logs"
-    echo -e "x-ui update       - Update"
-    echo -e "x-ui custom       - custom version"
-    echo -e "x-ui install      - Install"
-    echo -e "x-ui uninstall    - Uninstall"
-    echo "------------------------------------------"
+    echo -e "┌───────────────────────────────────────────────────────┐
+│  ${blue}x-ui control menu usages (subcommands):${plain}              │
+│                                                       │
+│  ${blue}x-ui${plain}              - Admin Management Script          │
+│  ${blue}x-ui start${plain}        - Start                            │
+│  ${blue}x-ui stop${plain}         - Stop                             │
+│  ${blue}x-ui restart${plain}      - Restart                          │
+│  ${blue}x-ui status${plain}       - Current Status                   │
+│  ${blue}x-ui settings${plain}     - Current Settings                 │
+│  ${blue}x-ui enable${plain}       - Enable Autostart on OS Startup   │
+│  ${blue}x-ui disable${plain}      - Disable Autostart on OS Startup  │
+│  ${blue}x-ui log${plain}          - Check logs                       │
+│  ${blue}x-ui banlog${plain}       - Check Fail2ban ban logs          │
+│  ${blue}x-ui update${plain}       - Update                           │
+│  ${blue}x-ui legacy${plain}       - legacy version                   │
+│  ${blue}x-ui install${plain}      - Install                          │
+│  ${blue}x-ui uninstall${plain}    - Uninstall                        │
+└───────────────────────────────────────────────────────┘"
 }
 
 show_menu() {
     echo -e "
-  ${green}3X-UI Panel Management Script${plain}
-  ${green}0.${plain} Exit Script
-————————————————
-  ${green}1.${plain} Install
-  ${green}2.${plain} Update
-  ${green}3.${plain} Update Menu
-  ${green}4.${plain} Legacy Version
-  ${green}5.${plain} Uninstall
-————————————————
-  ${green}6.${plain} Reset Username & Password & Secret Token
-  ${green}7.${plain} Reset Web Base Path
-  ${green}8.${plain} Reset Settings
-  ${green}9.${plain} Change Port
-  ${green}10.${plain} View Current Settings
-————————————————
-  ${green}11.${plain} Start
-  ${green}12.${plain} Stop
-  ${green}13.${plain} Restart
-  ${green}14.${plain} Check Status
-  ${green}15.${plain} Logs Management
-————————————————
-  ${green}16.${plain} Enable Autostart
-  ${green}17.${plain} Disable Autostart
-————————————————
-  ${green}18.${plain} SSL Certificate Management
-  ${green}19.${plain} Cloudflare SSL Certificate
-  ${green}20.${plain} IP Limit Management
-  ${green}21.${plain} Firewall Management
-  ${green}22.${plain} SSH Port Forwarding Management
-————————————————
-  ${green}23.${plain} Enable BBR
-  ${green}24.${plain} Update Geo Files
-  ${green}25.${plain} Speedtest by Ookla
+╔────────────────────────────────────────────────╗
+│   ${green}3X-UI Panel Management Script${plain}                │
+│   ${green}0.${plain} Exit Script                               │
+│────────────────────────────────────────────────│
+│   ${green}1.${plain} Install                                   │
+│   ${green}2.${plain} Update                                    │
+│   ${green}3.${plain} Update Menu                               │
+│   ${green}4.${plain} Legacy Version                            │
+│   ${green}5.${plain} Uninstall                                 │
+│────────────────────────────────────────────────│
+│   ${green}6.${plain} Reset Username & Password & Secret Token  │
+│   ${green}7.${plain} Reset Web Base Path                       │
+│   ${green}8.${plain} Reset Settings                            │
+│   ${green}9.${plain} Change Port                               │
+│  ${green}10.${plain} View Current Settings                     │
+│────────────────────────────────────────────────│
+│  ${green}11.${plain} Start                                     │
+│  ${green}12.${plain} Stop                                      │
+│  ${green}13.${plain} Restart                                   │
+│  ${green}14.${plain} Check Status                              │
+│  ${green}15.${plain} Logs Management                           │
+│────────────────────────────────────────────────│
+│  ${green}16.${plain} Enable Autostart                          │
+│  ${green}17.${plain} Disable Autostart                         │
+│────────────────────────────────────────────────│
+│  ${green}18.${plain} SSL Certificate Management                │
+│  ${green}19.${plain} Cloudflare SSL Certificate                │
+│  ${green}20.${plain} IP Limit Management                       │
+│  ${green}21.${plain} Firewall Management                       │
+│  ${green}22.${plain} SSH Port Forwarding Management            │
+│────────────────────────────────────────────────│
+│  ${green}23.${plain} Enable BBR                                │
+│  ${green}24.${plain} Update Geo Files                          │
+│  ${green}25.${plain} Speedtest by Ookla                        │
+╚────────────────────────────────────────────────╝
 "
     show_status
-    echo && read -p "Please enter your selection [0-25]: " num
+    echo && read -rp "Please enter your selection [0-25]: " num
 
     case "${num}" in
     0)

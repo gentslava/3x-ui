@@ -1,4 +1,4 @@
-[English](/README.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
+[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) |  [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
 
 <p align="center">
   <picture>
@@ -248,8 +248,8 @@ location /sub {
 
 ## Рекомендуемые ОС
 
-- Ubuntu 20.04+
-- Debian 11+
+- Ubuntu 22.04+
+- Debian 12+
 - CentOS 8+
 - OpenEuler 22.03+
 - Fedora 36+
@@ -257,11 +257,12 @@ location /sub {
 - Parch Linux
 - Manjaro
 - Armbian
-- AlmaLinux 8.0+
-- Rocky Linux 8+
+- AlmaLinux 9.5+
+- Rocky Linux 9.5+
 - Oracle Linux 8+
 - OpenSUSE Tubleweed
 - Amazon Linux 2023
+- Virtuozzo Linux 8+
 - Windows x64
 
 ## Поддерживаемые архитектуры и устройства
@@ -288,17 +289,18 @@ location /sub {
 
 ## Языки
 
-- English (английский)  
-- Persian (персидский)  
-- Traditional Chinese (традиционный китайский)  
-- Simplified Chinese (упрощенный китайский)  
-- Japanese (японский)  
-- Russian (русский)  
-- Vietnamese (вьетнамский)  
-- Spanish (испанский)  
-- Indonesian (индонезийский)  
-- Ukrainian (украинский)  
-- Turkish (турецкий)  
+- Arabic (арабский)
+- English (английский)
+- Persian (персидский)
+- Traditional Chinese (традиционный китайский)
+- Simplified Chinese (упрощенный китайский)
+- Japanese (японский)
+- Russian (русский)
+- Vietnamese (вьетнамский)
+- Spanish (испанский)
+- Indonesian (индонезийский)
+- Ukrainian (украинский)
+- Turkish (турецкий)
 - Português (Brazil) (португальский (Бразилия))
 
 ## Возможности
@@ -576,7 +578,8 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
   <img alt="3x-ui" src="./media/06-configs-light.png">
 </picture>
 <picture>
-  <img alt="3x-ui" src="./media/7.png">
+  <source media="(prefers-color-scheme: dark)" srcset="./media/07-bot-dark.png">
+  <img alt="3x-ui" src="./media/07-bot-light.png">
 </picture>
 
 ## Особая благодарность
@@ -586,8 +589,8 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 ## Благодарности
 
 - [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (License: **GPL-3.0**): _Enhanced v2ray/xray and v2ray/xray-clients routing rules with built-in Iranian domains and a focus on security and adblocking._
-- [Vietnam Adblock rules](https://github.com/vuong2023/vn-v2ray-rules) (License: **GPL-3.0**): _A hosted domain hosted in Vietnam and blocklist with the most efficiency for Vietnamese._
+- [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (License: **GPL-3.0**): _Этот репозиторий содержит автоматически обновляемые правила маршрутизации V2Ray на основе данных о заблокированных доменах и адресах в России._
 
 ## Число звёзд со временем
 
-[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg)](https://starchart.cc/gentslava/3x-ui)
+[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg?variant=adaptive)](https://starchart.cc/gentslava/3x-ui)

@@ -1,4 +1,4 @@
-[English](/README.md) | [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
+[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) |  [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
 
 <p align="center">
   <picture>
@@ -249,8 +249,8 @@ location /sub {
 
 ## Recommended OS
 
-- Ubuntu 20.04+
-- Debian 11+
+- Ubuntu 22.04+
+- Debian 12+
 - CentOS 8+
 - OpenEuler 22.03+
 - Fedora 36+
@@ -258,11 +258,12 @@ location /sub {
 - Parch Linux
 - Manjaro
 - Armbian
-- AlmaLinux 8.0+
-- Rocky Linux 8+
+- AlmaLinux 9.5+
+- Rocky Linux 9.5+
 - Oracle Linux 8+
 - OpenSUSE Tubleweed
 - Amazon Linux 2023
+- Virtuozzo Linux 8+
 - Windows x64
 
 ## Supported Architectures and Devices
@@ -289,6 +290,7 @@ Our platform offers compatibility with a diverse range of architectures and devi
 
 ## Languages
 
+- Arabic
 - English
 - Persian
 - Traditional Chinese
@@ -578,7 +580,8 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
   <img alt="3x-ui" src="./media/06-configs-light.png">
 </picture>
 <picture>
-  <img alt="3x-ui" src="./media/7.png">
+  <source media="(prefers-color-scheme: dark)" srcset="./media/07-bot-dark.png">
+  <img alt="3x-ui" src="./media/07-bot-light.png">
 </picture>
 
 ## A Special Thanks to
@@ -588,8 +591,8 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 ## Acknowledgment
 
 - [Iran v2ray rules](https://github.com/chocolate4u/Iran-v2ray-rules) (License: **GPL-3.0**): _Enhanced v2ray/xray and v2ray/xray-clients routing rules with built-in Iranian domains and a focus on security and adblocking._
-- [Vietnam Adblock rules](https://github.com/vuong2023/vn-v2ray-rules) (License: **GPL-3.0**): _A hosted domain hosted in Vietnam and blocklist with the most efficiency for Vietnamese._
+- [Russia v2ray rules](https://github.com/runetfreedom/russia-v2ray-rules-dat) (License: **GPL-3.0**): _This repository contains automatically updated V2Ray routing rules based on data on blocked domains and addresses in Russia._
 
 ## Stargazers over Time
 
-[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg)](https://starchart.cc/gentslava/3x-ui)
+[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg?variant=adaptive)](https://starchart.cc/gentslava/3x-ui)

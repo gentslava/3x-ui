@@ -2,6 +2,7 @@
 
 red='\033[0;31m'
 green='\033[0;32m'
+blue='\033[0;34m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
@@ -36,78 +37,20 @@ arch() {
     esac
 }
 
-echo "arch: $(arch)"
+echo "Arch: $(arch)"
 
-os_version=""
-os_version=$(grep "^VERSION_ID" /etc/os-release | cut -d '=' -f2 | tr -d '"' | tr -d '.')
+check_glibc_version() {
+    glibc_version=$(ldd --version | head -n1 | awk '{print $NF}')
 
-if [[ "${release}" == "arch" ]]; then
-    echo "Your OS is Arch Linux"
-elif [[ "${release}" == "parch" ]]; then
-    echo "Your OS is Parch Linux"
-elif [[ "${release}" == "manjaro" ]]; then
-    echo "Your OS is Manjaro"
-elif [[ "${release}" == "armbian" ]]; then
-    echo "Your OS is Armbian"
-elif [[ "${release}" == "alpine" ]]; then
-    echo "Your OS is Alpine Linux"
-elif [[ "${release}" == "opensuse-tumbleweed" ]]; then
-    echo "Your OS is OpenSUSE Tumbleweed"
-elif [[ "${release}" == "openEuler" ]]; then
-    if [[ ${os_version} -lt 2203 ]]; then
-        echo -e "${red} Please use OpenEuler 22.03 or higher ${plain}\n" && exit 1
+    required_version="2.32"
+    if [[ "$(printf '%s\n' "$required_version" "$glibc_version" | sort -V | head -n1)" != "$required_version" ]]; then
+        echo -e "${red}GLIBC version $glibc_version is too old! Required: 2.32 or higher${plain}"
+        echo "Please upgrade to a newer version of your operating system to get a higher GLIBC version."
+        exit 1
     fi
-elif [[ "${release}" == "centos" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use CentOS 8 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ubuntu" ]]; then
-    if [[ ${os_version} -lt 2004 ]]; then
-        echo -e "${red} Please use Ubuntu 20 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "fedora" ]]; then
-    if [[ ${os_version} -lt 36 ]]; then
-        echo -e "${red} Please use Fedora 36 or higher version!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "amzn" ]]; then
-    if [[ ${os_version} != "2023" ]]; then
-        echo -e "${red} Please use Amazon Linux 2023!${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "debian" ]]; then
-    if [[ ${os_version} -lt 11 ]]; then
-        echo -e "${red} Please use Debian 11 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "almalinux" ]]; then
-    if [[ ${os_version} -lt 80 ]]; then
-        echo -e "${red} Please use AlmaLinux 8.0 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "rocky" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Rocky Linux 8 or higher ${plain}\n" && exit 1
-    fi
-elif [[ "${release}" == "ol" ]]; then
-    if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red} Please use Oracle Linux 8 or higher ${plain}\n" && exit 1
-    fi
-else
-    echo -e "${red}Your operating system is not supported by this script.${plain}\n"
-    echo "Please ensure you are using one of the following supported operating systems:"
-    echo "- Ubuntu 20.04+"
-    echo "- Debian 11+"
-    echo "- CentOS 8+"
-    echo "- OpenEuler 22.03+"
-    echo "- Fedora 36+"
-    echo "- Arch Linux"
-    echo "- Parch Linux"
-    echo "- Manjaro"
-    echo "- Armbian"
-    echo "- AlmaLinux 8.0+"
-    echo "- Rocky Linux 8+"
-    echo "- Oracle Linux 8+"
-    echo "- OpenSUSE Tumbleweed"
-    echo "- Amazon Linux 2023"
-    exit 1
-fi
+    echo "GLIBC version: $glibc_version (meets requirement of 2.32+)"
+}
+check_glibc_version
 
 install_base() {
     case "${release}" in
@@ -117,7 +60,7 @@ install_base() {
     centos | almalinux | rocky | ol)
         yum -y update && yum install -y -q wget curl tar tzdata
         ;;
-    fedora | amzn)
+    fedora | amzn | virtuozzo)
         dnf -y update && dnf install -y -q wget curl tar tzdata
         ;;
     arch | manjaro | parch)
@@ -151,9 +94,9 @@ config_after_install() {
             local config_username=$(gen_random_string 10)
             local config_password=$(gen_random_string 10)
 
-            read -p "Would you like to customize the Panel Port settings? (If not, a random port will be applied) [y/n]: " config_confirm
+            read -rp "Would you like to customize the Panel Port settings? (If not, a random port will be applied) [y/n]: " config_confirm
             if [[ "${config_confirm}" == "y" || "${config_confirm}" == "Y" ]]; then
-                read -p "Please set up the panel port: " config_port
+                read -rp "Please set up the panel port: " config_port
                 echo -e "${yellow}Your Panel Port is: ${config_port}${plain}"
             else
                 local config_port=$(shuf -i 1024-62000 -n 1)
@@ -208,7 +151,7 @@ install_x-ui() {
             exit 1
         fi
         echo -e "Got x-ui latest version: ${tag_version}, beginning the installation..."
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz https://github.com/gentslava/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz
+        wget -N -O /usr/local/x-ui-linux-$(arch).tar.gz https://github.com/gentslava/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Downloading x-ui failed, please be sure that your server can access GitHub ${plain}"
             exit 1
@@ -225,7 +168,7 @@ install_x-ui() {
 
         url="https://github.com/gentslava/3x-ui/releases/download/${tag_version}/x-ui-linux-$(arch).tar.gz"
         echo -e "Beginning to install x-ui $1"
-        wget -N --no-check-certificate -O /usr/local/x-ui-linux-$(arch).tar.gz ${url}
+        wget -N -O /usr/local/x-ui-linux-$(arch).tar.gz ${url}
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Download x-ui $1 failed, please check if the version exists ${plain}"
             exit 1
@@ -250,7 +193,7 @@ install_x-ui() {
 
     chmod +x x-ui bin/xray-linux-$(arch)
     cp -f x-ui.service /etc/systemd/system/
-    wget --no-check-certificate -O /usr/bin/x-ui https://raw.githubusercontent.com/gentslava/3x-ui/main/x-ui.sh
+    wget -O /usr/bin/x-ui https://raw.githubusercontent.com/gentslava/3x-ui/main/x-ui.sh
     chmod +x /usr/local/x-ui/x-ui.sh
     chmod +x /usr/bin/x-ui
     config_after_install
@@ -260,24 +203,24 @@ install_x-ui() {
     systemctl start x-ui
     echo -e "${green}x-ui ${tag_version}${plain} installation finished, it is running now..."
     echo -e ""
-    echo -e "x-ui control menu usages: "
-    echo -e "----------------------------------------------"
-    echo -e "SUBCOMMANDS:"
-    echo -e "x-ui              - Admin Management Script"
-    echo -e "x-ui start        - Start"
-    echo -e "x-ui stop         - Stop"
-    echo -e "x-ui restart      - Restart"
-    echo -e "x-ui status       - Current Status"
-    echo -e "x-ui settings     - Current Settings"
-    echo -e "x-ui enable       - Enable Autostart on OS Startup"
-    echo -e "x-ui disable      - Disable Autostart on OS Startup"
-    echo -e "x-ui log          - Check logs"
-    echo -e "x-ui banlog       - Check Fail2ban ban logs"
-    echo -e "x-ui update       - Update"
-    echo -e "x-ui legacy       - legacy version"
-    echo -e "x-ui install      - Install"
-    echo -e "x-ui uninstall    - Uninstall"
-    echo -e "----------------------------------------------"
+    echo -e "┌───────────────────────────────────────────────────────┐
+│  ${blue}x-ui control menu usages (subcommands):${plain}              │
+│                                                       │
+│  ${blue}x-ui${plain}              - Admin Management Script          │
+│  ${blue}x-ui start${plain}        - Start                            │
+│  ${blue}x-ui stop${plain}         - Stop                             │
+│  ${blue}x-ui restart${plain}      - Restart                          │
+│  ${blue}x-ui status${plain}       - Current Status                   │
+│  ${blue}x-ui settings${plain}     - Current Settings                 │
+│  ${blue}x-ui enable${plain}       - Enable Autostart on OS Startup   │
+│  ${blue}x-ui disable${plain}      - Disable Autostart on OS Startup  │
+│  ${blue}x-ui log${plain}          - Check logs                       │
+│  ${blue}x-ui banlog${plain}       - Check Fail2ban ban logs          │
+│  ${blue}x-ui update${plain}       - Update                           │
+│  ${blue}x-ui legacy${plain}       - legacy version                   │
+│  ${blue}x-ui install${plain}      - Install                          │
+│  ${blue}x-ui uninstall${plain}    - Uninstall                        │
+└───────────────────────────────────────────────────────┘"
 }
 
 echo -e "${green}Running...${plain}"

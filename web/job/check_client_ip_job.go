@@ -11,6 +11,7 @@ import (
 	"sort"
 	"time"
 
+	"slices"
 	"x-ui/database"
 	"x-ui/database/model"
 	"x-ui/logger"
@@ -106,7 +107,7 @@ func (j *CheckClientIpJob) hasLimitIp() bool {
 
 func (j *CheckClientIpJob) processLogFile() bool {
 
-	ipRegex := regexp.MustCompile(`from \[?([0-9a-fA-F:.]+)\]?:\d+ accepted`)
+	ipRegex := regexp.MustCompile(`from (?:tcp:|udp:)?\[?([0-9a-fA-F\.:]+)\]?:\d+ accepted`)
 	emailRegex := regexp.MustCompile(`email: (.+)$`)
 
 	accessLogPath, _ := xray.GetAccessLogPath()
@@ -193,13 +194,7 @@ func (j *CheckClientIpJob) checkError(e error) {
 }
 
 func (j *CheckClientIpJob) contains(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(s, str)
 }
 
 func (j *CheckClientIpJob) getInboundClientIps(clientEmail string) (*model.InboundClientIps, error) {
