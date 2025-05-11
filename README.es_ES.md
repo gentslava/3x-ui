@@ -9,10 +9,10 @@
 
 **Un Panel Web Avanzado • Construido sobre Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
-[![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
-[![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
-[![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
+[![](https://img.shields.io/github/v/release/gentslava/3x-ui.svg)](https://github.com/gentslava/3x-ui/releases)
+[![](https://img.shields.io/github/actions/workflow/status/gentslava/3x-ui/release.yml.svg)](#)
+[![GO Version](https://img.shields.io/github/go-mod/go-version/gentslava/3x-ui.svg)](#)
+[![Downloads](https://img.shields.io/github/downloads/gentslava/3x-ui/total.svg)](#)
 [![License](https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 > **Descargo de responsabilidad:** Este proyecto es solo para aprendizaje personal y comunicación, por favor no lo uses con fines ilegales, por favor no lo uses en un entorno de producción
@@ -20,7 +20,7 @@
 **Si este proyecto te es útil, podrías considerar darle una**:star2:
 
 <p align="left">
-  <a href="https://buymeacoffee.com/mhsanaei" target="_blank">
+  <a href="https://buymeacoffee.com/gentslava" target="_blank">
     <img src="./media/buymeacoffe.png" alt="Image">
   </a>
 </p>
@@ -32,7 +32,7 @@
 ## Instalar y Actualizar
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.5.8/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh)
 ```
 
 ## Instalar versión antigua (no recomendamos)
@@ -40,7 +40,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.5.
 Para instalar la versión deseada, utiliza el siguiente comando de instalación. Por ejemplo, ver `v1.7.9`:
 
 ```
-VERSION=v1.7.9 && bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
+VERSION=v1.7.9 && bash <(curl -Ls "https://raw.githubusercontent.com/gentslava/3x-ui/$VERSION/install.sh") $VERSION
 ```
 
 ## Certificado SSL
@@ -59,8 +59,8 @@ Para gestionar certificados SSL utilizando ACME:
    - **Get SSL:** Obtener certificados SSL.
    - **Revoke:** Revocar certificados SSL existentes.
    - **Force Renew:** Forzar la renovación de certificados SSL.
-   - **Show Existing Domains:** Mostrar todos los certificados de dominio disponibles en el servidor.  
-   - **Set Certificate Paths for the Panel:** Especificar el certificado para tu dominio que será utilizado por el panel. 
+   - **Show Existing Domains:** Mostrar todos los certificados de dominio disponibles en el servidor.
+   - **Set Certificate Paths for the Panel:** Especificar el certificado para tu dominio que será utilizado por el panel.
 
 ### Certbot
 
@@ -116,7 +116,7 @@ case "${ARCH}" in
 esac
 
 
-wget https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
+wget https://github.com/gentslava/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
 ```
 
 2. Una vez que se haya descargado el paquete comprimido, ejecuta los siguientes comandos para instalar o actualizar x-ui:
@@ -163,7 +163,7 @@ systemctl restart x-ui
 2. Clona el Repositorio del Proyecto:
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/gentslava/3x-ui.git
    cd 3x-ui
    ```
 
@@ -183,7 +183,7 @@ systemctl restart x-ui
       --network=host \
       --restart=unless-stopped \
       --name 3x-ui \
-      ghcr.io/mhsanaei/3x-ui:latest
+      ghcr.io/gentslava/3x-ui:latest
    ```
 
 actualizar a la última versión
@@ -218,7 +218,7 @@ location / {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -226,7 +226,7 @@ location / {
 
 #### Nginx sub-path
 - EAsegúrese de que la "Ruta Raíz de la URL del Panel" en la configuración del panel `/sub` es la misma.
-- El `url` en la configuración del panel debe terminar con `/`.   
+- El `url` en la configuración del panel debe terminar con `/`.
 
 ```nginx
 location /sub {
@@ -235,7 +235,7 @@ location /sub {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -284,18 +284,18 @@ Nuestra plataforma ofrece compatibilidad con una amplia gama de arquitecturas y 
 ## Idiomas
 
 - Arabic (Árabe)
-- English (inglés)  
-- Persian (persa)  
-- Traditional Chinese (chino tradicional)  
-- Simplified Chinese (chino simplificado)  
-- Japanese (japonés)  
-- Russian (ruso)  
-- Vietnamese (vietnamita)  
-- Spanish (español)  
-- Indonesian (indonesio)  
-- Ukrainian (ucraniano)  
-- Turkish (turco)  
-- Português (Brazil) (portugués (Brasil))  
+- English (inglés)
+- Persian (persa)
+- Traditional Chinese (chino tradicional)
+- Simplified Chinese (chino simplificado)
+- Japanese (japonés)
+- Russian (ruso)
+- Vietnamese (vietnamita)
+- Spanish (español)
+- Indonesian (indonesio)
+- Ukrainian (ucraniano)
+- Turkish (turco)
+- Português (Brazil) (portugués (Brasil))
 
 
 ## Características
@@ -586,4 +586,4 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 
 ## Estrellas a lo largo del tiempo
 
-[![Stargazers over time](https://starchart.cc/MHSanaei/3x-ui.svg?variant=adaptive)](https://starchart.cc/MHSanaei/3x-ui)
+[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg?variant=adaptive)](https://starchart.cc/gentslava/3x-ui)

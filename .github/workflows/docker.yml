@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "v*.*.*"
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -13,17 +18,16 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
-   
+
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: |
-          hsanaeii/3x-ui
-          ghcr.io/mhsanaei/3x-ui
+        images: ghcr.io/${{ github.repository }}
         tags: |
           type=ref,event=branch
           type=ref,event=tag
+          type=ref,event=pr
           type=pep440,pattern={{version}}
 
     - name: Set up QEMU

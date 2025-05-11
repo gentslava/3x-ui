@@ -1,4 +1,4 @@
-[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) |  [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md) 
+[English](/README.md) | [فارسی](/README.fa_IR.md) | [العربية](/README.ar_EG.md) |  [中文](/README.zh_CN.md) | [Español](/README.es_ES.md) | [Русский](/README.ru_RU.md)
 
 <p align="center">
   <picture>
@@ -9,10 +9,10 @@
 
 **An Advanced Web Panel • Built on Xray Core**
 
-[![](https://img.shields.io/github/v/release/mhsanaei/3x-ui.svg)](https://github.com/MHSanaei/3x-ui/releases)
-[![](https://img.shields.io/github/actions/workflow/status/mhsanaei/3x-ui/release.yml.svg)](#)
-[![GO Version](https://img.shields.io/github/go-mod/go-version/mhsanaei/3x-ui.svg)](#)
-[![Downloads](https://img.shields.io/github/downloads/mhsanaei/3x-ui/total.svg)](#)
+[![](https://img.shields.io/github/v/release/gentslava/3x-ui.svg)](https://github.com/gentslava/3x-ui/releases)
+[![](https://img.shields.io/github/actions/workflow/status/gentslava/3x-ui/release.yml.svg)](#)
+[![GO Version](https://img.shields.io/github/go-mod/go-version/gentslava/3x-ui.svg)](#)
+[![Downloads](https://img.shields.io/github/downloads/gentslava/3x-ui/total.svg)](#)
 [![License](https://img.shields.io/badge/license-GPL%20V3-blue.svg?longCache=true)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 > **Disclaimer:** This project is only for personal learning and communication, please do not use it for illegal purposes, please do not use it in a production environment
@@ -20,7 +20,7 @@
 **If this project is helpful to you, you may wish to give it a**:star2:
 
 <p align="left">
-  <a href="https://buymeacoffee.com/mhsanaei" target="_blank">
+  <a href="https://buymeacoffee.com/gentslava" target="_blank">
     <img src="./media/buymeacoffe.png" alt="Image">
   </a>
 </p>
@@ -32,7 +32,7 @@
 ## Install & Upgrade
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.5.8/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/gentslava/3x-ui/master/install.sh)
 ```
 
 ## Install legacy Version (we don't recommend)
@@ -40,7 +40,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.5.
 To install your desired version, use following installation command. e.g., ver `v1.7.9`:
 
 ```
-VERSION=v1.7.9 && bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
+VERSION=v1.7.9 && bash <(curl -Ls "https://raw.githubusercontent.com/gentslava/3x-ui/$VERSION/install.sh") $VERSION
 ```
 
 ## SSL Certificate
@@ -59,8 +59,8 @@ To manage SSL certificates using ACME:
    - **Get SSL:** Obtain SSL certificates.
    - **Revoke:** Revoke existing SSL certificates.
    - **Force Renew:** Force renewal of SSL certificates.
-   - **Show Existing Domains:** Display all domain certificates available on the server.  
-   - **Set Certificate Paths for the Panel:** Specify the certificate for your domain to be used by the panel. 
+   - **Show Existing Domains:** Display all domain certificates available on the server.
+   - **Set Certificate Paths for the Panel:** Specify the certificate for your domain to be used by the panel.
 
 ### Certbot
 
@@ -118,7 +118,7 @@ case "${ARCH}" in
 esac
 
 
-wget https://github.com/MHSanaei/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
+wget https://github.com/gentslava/3x-ui/releases/latest/download/x-ui-linux-${XUI_ARCH}.tar.gz
 ```
 
 2. Once the compressed package is downloaded, execute the following commands to install or upgrade x-ui:
@@ -166,7 +166,7 @@ systemctl restart x-ui
 2. **Clone the Project Repository:**
 
    ```sh
-   git clone https://github.com/MHSanaei/3x-ui.git
+   git clone https://github.com/gentslava/3x-ui.git
    cd 3x-ui
    ```
 
@@ -188,7 +188,7 @@ systemctl restart x-ui
       --network=host \
       --restart=unless-stopped \
       --name 3x-ui \
-      ghcr.io/mhsanaei/3x-ui:latest
+      ghcr.io/gentslava/3x-ui:latest
    ```
 
 4. **Update to the Latest Version:**
@@ -223,7 +223,7 @@ location / {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -231,7 +231,7 @@ location / {
 
 #### Nginx sub-path
 - Ensure that the "URI Path" in the `/sub` panel settings is the same.
-- The `url` in the panel settings needs to end with `/`.   
+- The `url` in the panel settings needs to end with `/`.
 
 ```nginx
 location /sub {
@@ -240,7 +240,7 @@ location /sub {
     proxy_set_header Host $http_host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Range $http_range;
-    proxy_set_header If-Range $http_if_range; 
+    proxy_set_header If-Range $http_if_range;
     proxy_redirect off;
     proxy_pass http://127.0.0.1:2053;
 }
@@ -595,4 +595,4 @@ XUI_BIN_FOLDER="bin" XUI_DB_FOLDER="/etc/x-ui" go build main.go
 
 ## Stargazers over Time
 
-[![Stargazers over time](https://starchart.cc/MHSanaei/3x-ui.svg?variant=adaptive)](https://starchart.cc/MHSanaei/3x-ui)
+[![Stargazers over time](https://starchart.cc/gentslava/3x-ui.svg?variant=adaptive)](https://starchart.cc/gentslava/3x-ui)
