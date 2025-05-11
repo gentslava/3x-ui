@@ -44,6 +44,7 @@ func (a *ServerController) initRouter(g *gin.RouterGroup) {
 	g.POST("/stopXrayService", a.stopXrayService)
 	g.POST("/restartXrayService", a.restartXrayService)
 	g.POST("/installXray/:version", a.installXray)
+	g.POST("/updateGeofile/:fileName", a.updateGeofile)
 	g.POST("/logs/:count", a.getLogs)
 	g.POST("/getConfigJson", a.getConfigJson)
 	g.GET("/getDb", a.getDb)
@@ -95,26 +96,32 @@ func (a *ServerController) getXrayVersion(c *gin.Context) {
 func (a *ServerController) installXray(c *gin.Context) {
 	version := c.Param("version")
 	err := a.serverService.UpdateXray(version)
-	jsonMsg(c, I18nWeb(c, "install")+" xray", err)
+	jsonMsg(c, I18nWeb(c, "pages.index.xraySwitchVersionPopover"), err)
+}
+
+func (a *ServerController) updateGeofile(c *gin.Context) {
+	fileName := c.Param("fileName")
+	err := a.serverService.UpdateGeofile(fileName)
+	jsonMsg(c, I18nWeb(c, "pages.index.geofileUpdatePopover"), err)
 }
 
 func (a *ServerController) stopXrayService(c *gin.Context) {
 	a.lastGetStatusTime = time.Now()
 	err := a.serverService.StopXrayService()
 	if err != nil {
-		jsonMsg(c, "", err)
+		jsonMsg(c, I18nWeb(c, "pages.xray.stopError"), err)
 		return
 	}
-	jsonMsg(c, "Xray stopped", err)
+	jsonMsg(c, I18nWeb(c, "pages.xray.stopSuccess"), err)
 }
 
 func (a *ServerController) restartXrayService(c *gin.Context) {
 	err := a.serverService.RestartXrayService()
 	if err != nil {
-		jsonMsg(c, "", err)
+		jsonMsg(c, I18nWeb(c, "pages.xray.restartError"), err)
 		return
 	}
-	jsonMsg(c, "Xray restarted", err)
+	jsonMsg(c, I18nWeb(c, "pages.xray.restartSuccess"), err)
 }
 
 func (a *ServerController) getLogs(c *gin.Context) {
@@ -128,7 +135,7 @@ func (a *ServerController) getLogs(c *gin.Context) {
 func (a *ServerController) getConfigJson(c *gin.Context) {
 	configJson, err := a.serverService.GetConfigJson()
 	if err != nil {
-		jsonMsg(c, "get config.json", err)
+		jsonMsg(c, I18nWeb(c, "pages.index.getConfigError"), err)
 		return
 	}
 	jsonObj(c, configJson, nil)
@@ -137,7 +144,7 @@ func (a *ServerController) getConfigJson(c *gin.Context) {
 func (a *ServerController) getDb(c *gin.Context) {
 	db, err := a.serverService.GetDb()
 	if err != nil {
-		jsonMsg(c, "get Database", err)
+		jsonMsg(c, I18nWeb(c, "pages.index.getDatabaseError"), err)
 		return
 	}
 
@@ -165,7 +172,7 @@ func (a *ServerController) importDB(c *gin.Context) {
 	// Get the file from the request body
 	file, _, err := c.Request.FormFile("db")
 	if err != nil {
-		jsonMsg(c, "Error reading db file", err)
+		jsonMsg(c, I18nWeb(c, "pages.index.readDatabaseError"), err)
 		return
 	}
 	defer file.Close()
@@ -177,16 +184,16 @@ func (a *ServerController) importDB(c *gin.Context) {
 	// Import it
 	err = a.serverService.ImportDB(file)
 	if err != nil {
-		jsonMsg(c, "", err)
+		jsonMsg(c, I18nWeb(c, "pages.index.importDatabaseError"), err)
 		return
 	}
-	jsonObj(c, "Import DB", nil)
+	jsonObj(c, I18nWeb(c, "pages.index.importDatabaseSuccess"), nil)
 }
 
 func (a *ServerController) getNewX25519Cert(c *gin.Context) {
 	cert, err := a.serverService.GetNewX25519Cert()
 	if err != nil {
-		jsonMsg(c, "get x25519 certificate", err)
+		jsonMsg(c, I18nWeb(c, "pages.inbounds.toasts.getNewX25519CertError"), err)
 		return
 	}
 	jsonObj(c, cert, nil)

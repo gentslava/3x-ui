@@ -16,6 +16,7 @@ import (
 	"x-ui/web"
 	"x-ui/web/global"
 	"x-ui/web/service"
+	"x-ui/util/crypto"
 
 	"github.com/op/go-logging"
 )
@@ -161,6 +162,12 @@ func showSetting(show bool) {
 		} else {
 			fmt.Println("Panel is secure with SSL")
 		}
+
+		hasDefaultCredential := func() bool {
+			return userModel.Username == "admin" && crypto.CheckPasswordHash(userModel.Password, "admin")
+		}()
+
+		fmt.Println("hasDefaultCredential:", hasDefaultCredential)
 		fmt.Println("port:", port)
 		fmt.Println("webBasePath:", webBasePath)
 	}
@@ -339,36 +346,6 @@ func migrateDb() {
 	fmt.Println("Migration done!")
 }
 
-func removeSecret() {
-	userService := service.UserService{}
-
-	secretExists, err := userService.CheckSecretExistence()
-	if err != nil {
-		fmt.Println("Error checking secret existence:", err)
-		return
-	}
-
-	if !secretExists {
-		fmt.Println("No secret exists to remove.")
-		return
-	}
-
-	err = userService.RemoveUserSecret()
-	if err != nil {
-		fmt.Println("Error removing secret:", err)
-		return
-	}
-
-	settingService := service.SettingService{}
-	err = settingService.SetSecretStatus(false)
-	if err != nil {
-		fmt.Println("Error updating secret status:", err)
-		return
-	}
-
-	fmt.Println("Secret removed successfully.")
-}
-
 func main() {
 	if len(os.Args) < 2 {
 		runWebServer()
@@ -396,10 +373,8 @@ func main() {
 	var reset bool
 	var show bool
 	var getCert bool
-	var remove_secret bool
 	settingCmd.BoolVar(&reset, "reset", false, "Reset all settings")
 	settingCmd.BoolVar(&show, "show", false, "Display current settings")
-	settingCmd.BoolVar(&remove_secret, "remove_secret", false, "Remove secret key")
 	settingCmd.IntVar(&port, "port", 0, "Set panel port number")
 	settingCmd.StringVar(&username, "username", "", "Set login username")
 	settingCmd.StringVar(&password, "password", "", "Set login password")
@@ -462,9 +437,6 @@ func main() {
 		}
 		if (tgbottoken != "") || (tgbotchatid != "") || (tgbotRuntime != "") {
 			updateTgbotSetting(tgbottoken, tgbotchatid, tgbotRuntime)
-		}
-		if remove_secret {
-			removeSecret()
 		}
 		if enabletgbot {
 			updateTgbotEnableSts(enabletgbot)

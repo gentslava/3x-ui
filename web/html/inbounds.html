@@ -301,7 +301,8 @@
                   :expand-icon-column-index="0"
                   :indent-size="0"
                   :row-class-name="dbInbound => (dbInbound.isMultiUser() ? '' : 'hideExpandIcon')"
-                  :style="{ marginTop: '10px' }">
+                  :style="{ marginTop: '10px' }"
+                  :locale='{ filterConfirm: `{{ i18n "confirm" }}`, filterReset: `{{ i18n "reset" }}`, emptyText: `{{ i18n "noData" }}` }'>
                 <template slot="action" slot-scope="text, dbInbound">
                   <a-dropdown :trigger="['click']">
                     <a-icon @click="e => e.preventDefault()" type="more" :style="{ fontSize: '20px', textDecoration: 'solid' }"></a-icon>
@@ -978,7 +979,7 @@
             openAddInbound() {
                 inModal.show({
                     title: '{{ i18n "pages.inbounds.addInbound"}}',
-                    okText: '{{ i18n "pages.inbounds.create"}}',
+                    okText: '{{ i18n "create"}}',
                     cancelText: '{{ i18n "close" }}',
                     confirm: async (inbound, dbInbound) => {
                         await this.addInbound(inbound, dbInbound, inModal);
@@ -991,7 +992,7 @@
                 const inbound = dbInbound.toInbound();
                 inModal.show({
                     title: '{{ i18n "pages.inbounds.modifyInbound"}}',
-                    okText: '{{ i18n "pages.inbounds.update"}}',
+                    okText: '{{ i18n "update"}}',
                     cancelText: '{{ i18n "close" }}',
                     inbound: inbound,
                     dbInbound: dbInbound,
