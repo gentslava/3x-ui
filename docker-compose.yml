@@ -1,9 +1,10 @@
 services:
-  3xui:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    container_name: 3xui_app
+  3x-ui:
+    image: ghcr.io/gentslava/3x-ui:latest
+    container_name: 3x-ui
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
     # hostname: yourhostname <- optional
     volumes:
       - $PWD/db/:/etc/x-ui/
