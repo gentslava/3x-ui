@@ -14,7 +14,6 @@ import (
 
 const (
 	loginUserKey = "LOGIN_USER"
-	defaultPath  = "/"
 )
 
 func init() {
@@ -59,8 +58,12 @@ func IsLogin(c *gin.Context) bool {
 func ClearSession(c *gin.Context) {
 	s := sessions.Default(c)
 	s.Clear()
+	cookiePath := c.GetString("base_path")
+	if cookiePath == "" {
+		cookiePath = "/"
+	}
 	s.Options(sessions.Options{
-		Path:     defaultPath,
+		Path:     cookiePath,
 		MaxAge:   -1,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
