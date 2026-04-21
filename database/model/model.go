@@ -21,6 +21,7 @@ const (
 	Shadowsocks Protocol = "shadowsocks"
 	Mixed       Protocol = "mixed"
 	WireGuard   Protocol = "wireguard"
+	Hysteria    Protocol = "hysteria"
 )
 
 // User represents a user account in the 3x-ui panel.
@@ -118,10 +119,11 @@ type CustomGeoResource struct {
 
 // Client represents a client configuration for Xray inbounds with traffic limits and settings.
 type Client struct {
-	ID         string `json:"id"`                           // Unique client identifier
+	ID         string `json:"id,omitempty"`                 // Unique client identifier
 	Security   string `json:"security"`                     // Security method (e.g., "auto", "aes-128-gcm")
-	Password   string `json:"password"`                     // Client password
-	Flow       string `json:"flow"`                         // Flow control (XTLS)
+	Password   string `json:"password,omitempty"`           // Client password
+	Flow       string `json:"flow,omitempty"`               // Flow control (XTLS)
+	Auth       string `json:"auth,omitempty"`               // Auth password (Hysteria)
 	Email      string `json:"email"`                        // Client email identifier
 	LimitIP    int    `json:"limitIp"`                      // IP limit for this client
 	TotalGB    int64  `json:"totalGB" form:"totalGB"`       // Total traffic limit in GB

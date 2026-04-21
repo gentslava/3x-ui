@@ -207,14 +207,15 @@ func (s *Server) initRouter() (*gin.Engine, error) {
 
 	store := cookie.NewStore(secret)
 	// Configure default session cookie options, including expiration (MaxAge)
-	if sessionMaxAge, err := s.settingService.GetSessionMaxAge(); err == nil {
-		store.Options(sessions.Options{
-			Path:     "/",
-			MaxAge:   sessionMaxAge * 60, // minutes -> seconds
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-		})
+	sessionOptions := sessions.Options{
+		Path:     basePath,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
+	if sessionMaxAge, err := s.settingService.GetSessionMaxAge(); err == nil && sessionMaxAge > 0 {
+		sessionOptions.MaxAge = sessionMaxAge * 60 // minutes -> seconds
+	}
+	store.Options(sessionOptions)
 	engine.Use(sessions.Sessions("3x-ui", store))
 	engine.Use(func(c *gin.Context) {
 		c.Set("base_path", basePath)

@@ -125,7 +125,7 @@ class DBInbound {
             sniffing: sniffing,
             clientStats: this.clientStats,
         };
-        
+
         this._cachedInbound = Inbound.fromJson(config);
         return this._cachedInbound;
     }
@@ -147,6 +147,7 @@ class DBInbound {
             case Protocols.VMESS:
             case Protocols.VLESS:
             case Protocols.TROJAN:
+            case Protocols.HYSTERIA:
                 return true;
             case Protocols.SHADOWSOCKS:
                 return this.toInbound().isSSMultiUser;
@@ -161,6 +162,7 @@ class DBInbound {
             case Protocols.VLESS:
             case Protocols.TROJAN:
             case Protocols.SHADOWSOCKS:
+            case Protocols.HYSTERIA:
                 return true;
             default:
                 return false;
