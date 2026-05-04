@@ -108,8 +108,15 @@
     el: '#app',
     data: {
       themeSwitcher,
-      loadingStates: { fetched: false, spinning: false },
-      user: { username: "", password: "", twoFactorCode: "" },
+      loadingStates: {
+        fetched: false,
+        spinning: false
+      },
+      user: {
+        username: "",
+        password: "",
+        twoFactorCode: ""
+      },
       twoFactorEnable: false,
       lang: "",
       animationStarted: false
@@ -233,11 +240,16 @@
         }
       }
     });
-    pm_wait_for_forms.observe(pm_host, { childList: true, subtree: true });
+    pm_wait_for_forms.observe(pm_host, {
+      childList: true,
+      subtree: true
+    });
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', pm_init, { once: true });
+    document.addEventListener('DOMContentLoaded', pm_init, {
+      once: true
+    });
   } else {
     pm_init();
   }

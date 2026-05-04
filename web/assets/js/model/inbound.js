@@ -697,7 +697,6 @@ class TlsStreamSettings extends XrayCommonClass {
         certificates = [new TlsStreamSettings.Cert()],
         alpn = [ALPN_OPTION.H2, ALPN_OPTION.HTTP1],
         echServerKeys = '',
-        echForceQuery = 'none',
         settings = new TlsStreamSettings.Settings()
     ) {
         super();
@@ -711,7 +710,6 @@ class TlsStreamSettings extends XrayCommonClass {
         this.certs = certificates;
         this.alpn = alpn;
         this.echServerKeys = echServerKeys;
-        this.echForceQuery = echForceQuery;
         this.settings = settings;
     }
 
@@ -744,7 +742,6 @@ class TlsStreamSettings extends XrayCommonClass {
             certs,
             json.alpn,
             json.echServerKeys,
-            json.echForceQuery,
             settings,
         );
     }
@@ -761,7 +758,6 @@ class TlsStreamSettings extends XrayCommonClass {
             certificates: TlsStreamSettings.toJsonArray(this.certs),
             alpn: this.alpn,
             echServerKeys: this.echServerKeys,
-            echForceQuery: this.echForceQuery,
             settings: this.settings,
         };
     }
