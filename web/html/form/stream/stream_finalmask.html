@@ -356,10 +356,10 @@
       </a-form-item>
       <template v-if="['brutal','force-brutal'].includes(inbound.stream.finalmask.quicParams.congestion)">
         <a-form-item label="Brutal Up">
-          <a-input v-model.trim="inbound.stream.finalmask.quicParams.brutalUp" placeholder="e.g. 60 mbps" />
+          <a-input v-model.trim="inbound.stream.finalmask.quicParams.brutalUp" :min="65537" placeholder="65537" />
         </a-form-item>
         <a-form-item label="Brutal Down">
-          <a-input v-model.trim="inbound.stream.finalmask.quicParams.brutalDown" placeholder="e.g. 60 mbps" />
+          <a-input v-model.trim="inbound.stream.finalmask.quicParams.brutalDown" :min="65537" placeholder="65537" />
         </a-form-item>
       </template>
       <a-form-item label="UDP Hop">
@@ -377,30 +377,30 @@
         <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxIdleTimeout" :min="4" :max="120" />
       </a-form-item>
       <a-form-item label="Keep Alive Period (s)">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.keepAlivePeriod" :min="0" :max="60" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.keepAlivePeriod" :min="2" :max="60" />
       </a-form-item>
       <a-form-item label="Disable Path MTU Dis">
         <a-switch v-model="inbound.stream.finalmask.quicParams.disablePathMTUDiscovery"></a-switch>
       </a-form-item>
       <a-form-item label="Max Incoming Streams">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxIncomingStreams" :min="0"
-          placeholder="0 = default" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxIncomingStreams" :min="8"
+          placeholder="1024 = default" />
       </a-form-item>
       <a-form-item label="Init Stream Window">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.initStreamReceiveWindow" :min="0"
-          placeholder="0 = default" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.initStreamReceiveWindow" :min="16384"
+          placeholder="8388608 = default" />
       </a-form-item>
       <a-form-item label="Max Stream Window">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxStreamReceiveWindow" :min="0"
-          placeholder="0 = default" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxStreamReceiveWindow" :min="16384"
+          placeholder="8388608 = default" />
       </a-form-item>
       <a-form-item label="Init Conn Window">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.initConnectionReceiveWindow" :min="0"
-          placeholder="0 = default" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.initConnectionReceiveWindow" :min="16384"
+          placeholder="20971520 = default" />
       </a-form-item>
       <a-form-item label="Max Conn Window">
-        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxConnectionReceiveWindow" :min="0"
-          placeholder="0 = default" />
+        <a-input-number v-model.number="inbound.stream.finalmask.quicParams.maxConnectionReceiveWindow" :min="16384"
+          placeholder="20971520 = default" />
       </a-form-item>
     </template>
   </template>
