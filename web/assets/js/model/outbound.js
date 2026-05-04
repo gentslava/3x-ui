@@ -1425,14 +1425,16 @@ Outbound.FreedomSettings = class extends CommonClass {
         redirect = '',
         fragment = {},
         noises = [],
-        ipsBlocked = [],
+        finalRules = [],
     ) {
         super();
         this.domainStrategy = domainStrategy;
         this.redirect = redirect;
         this.fragment = fragment || {};
         this.noises = Array.isArray(noises) ? noises : [];
-        this.ipsBlocked = Array.isArray(ipsBlocked) ? ipsBlocked : [];
+        this.finalRules = Array.isArray(finalRules)
+            ? finalRules.map(rule => rule instanceof Outbound.FreedomSettings.FinalRule ? rule : Outbound.FreedomSettings.FinalRule.fromJson(rule))
+            : [];
     }
 
     addNoise() {
@@ -1443,13 +1445,30 @@ Outbound.FreedomSettings = class extends CommonClass {
         this.noises.splice(index, 1);
     }
 
+    addFinalRule(action = 'block') {
+        this.finalRules.push(new Outbound.FreedomSettings.FinalRule(action));
+    }
+
+    delFinalRule(index) {
+        this.finalRules.splice(index, 1);
+    }
+
     static fromJson(json = {}) {
+        const finalRules = Array.isArray(json.finalRules)
+            ? json.finalRules.map(rule => Outbound.FreedomSettings.FinalRule.fromJson(rule))
+            : [];
+
+        // Backward compatibility: map legacy ipsBlocked entries to blocking finalRules.
+        if (finalRules.length === 0 && Array.isArray(json.ipsBlocked) && json.ipsBlocked.length > 0) {
+            finalRules.push(new Outbound.FreedomSettings.FinalRule('block', '', '', json.ipsBlocked, ''));
+        }
+
         return new Outbound.FreedomSettings(
             json.domainStrategy,
             json.redirect,
             json.fragment ? Outbound.FreedomSettings.Fragment.fromJson(json.fragment) : {},
             json.noises ? json.noises.map(noise => Outbound.FreedomSettings.Noise.fromJson(noise)) : [],
-            json.ipsBlocked || [],
+            finalRules,
         );
     }
 
@@ -1459,7 +1478,7 @@ Outbound.FreedomSettings = class extends CommonClass {
             redirect: ObjectUtil.isEmpty(this.redirect) ? undefined : this.redirect,
             fragment: Object.keys(this.fragment).length === 0 ? undefined : this.fragment,
             noises: this.noises.length === 0 ? undefined : Outbound.FreedomSettings.Noise.toJsonArray(this.noises),
-            ipsBlocked: this.ipsBlocked.length === 0 ? undefined : this.ipsBlocked,
+            finalRules: this.finalRules.length === 0 ? undefined : Outbound.FreedomSettings.FinalRule.toJsonArray(this.finalRules),
         };
     }
 };
@@ -1517,6 +1536,37 @@ Outbound.FreedomSettings.Noise = class extends CommonClass {
             packet: this.packet,
             delay: this.delay,
             applyTo: this.applyTo
+        };
+    }
+};
+
+Outbound.FreedomSettings.FinalRule = class extends CommonClass {
+    constructor(action = 'block', network = '', port = '', ip = [], blockDelay = '') {
+        super();
+        this.action = action;
+        this.network = network;
+        this.port = port;
+        this.ip = Array.isArray(ip) ? ip : [];
+        this.blockDelay = blockDelay;
+    }
+
+    static fromJson(json = {}) {
+        return new Outbound.FreedomSettings.FinalRule(
+            json.action,
+            Array.isArray(json.network) ? json.network.join(',') : json.network,
+            json.port,
+            json.ip || [],
+            json.blockDelay,
+        );
+    }
+
+    toJson() {
+        return {
+            action: ['allow', 'block'].includes(this.action) ? this.action : 'block',
+            network: ObjectUtil.isEmpty(this.network) ? undefined : this.network,
+            port: ObjectUtil.isEmpty(this.port) ? undefined : this.port,
+            ip: this.ip.length === 0 ? undefined : this.ip,
+            blockDelay: this.action === 'block' && !ObjectUtil.isEmpty(this.blockDelay) ? this.blockDelay : undefined,
         };
     }
 };

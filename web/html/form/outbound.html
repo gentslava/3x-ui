@@ -28,12 +28,70 @@
         <a-form-item label="Redirect">
           <a-input v-model="outbound.settings.redirect"></a-input>
         </a-form-item>
-        <a-form-item label="IPs Blocked">
-          <a-select mode="tags" v-model="outbound.settings.ipsBlocked" :style="{ width: '100%' }"
-            :dropdown-class-name="themeSwitcher.currentTheme" :token-separators="[',']"
-            placeholder="IP/CIDR/geoip:*/ext:*">
-          </a-select>
+        <a-form-item label="Final Rules">
+          <a-button icon="plus" type="primary" size="small" @click="outbound.settings.addFinalRule()"></a-button>
         </a-form-item>
+        <a-form v-for="(rule, index) in outbound.settings.finalRules" :key="index" :colon="false"
+          :label-col="{ md: {span:8} }" :wrapper-col="{ md: {span:14} }">
+          <a-divider :style="{ margin: '0' }">
+            Final Rule [[ index + 1 ]]
+            <a-icon type="delete" @click="() => outbound.settings.delFinalRule(index)"
+              :style="{ color: 'rgb(255, 77, 79)', cursor: 'pointer' }"></a-icon>
+          </a-divider>
+
+          <a-form-item label="Action">
+            <a-select v-model="rule.action" :dropdown-class-name="themeSwitcher.currentTheme">
+              <a-select-option value="allow">allow</a-select-option>
+              <a-select-option value="block">block</a-select-option>
+            </a-select>
+          </a-form-item>
+
+          <a-form-item>
+            <template slot="label">
+              <a-tooltip>
+                <template slot="title">
+                  <span>Optional: tcp, udp, tcp,udp</span>
+                </template>
+                Network
+                <a-icon type="question-circle"></a-icon>
+              </a-tooltip>
+            </template>
+            <a-input v-model.trim="rule.network" placeholder="tcp,udp"></a-input>
+          </a-form-item>
+
+          <a-form-item>
+            <template slot="label">
+              <a-tooltip>
+                <template slot="title">
+                  <span>Optional: same format as routing port, e.g. 53,443,1000-2000</span>
+                </template>
+                Port
+                <a-icon type="question-circle"></a-icon>
+              </a-tooltip>
+            </template>
+            <a-input v-model.trim="rule.port" placeholder="53,443"></a-input>
+          </a-form-item>
+
+          <a-form-item>
+            <template slot="label">
+              <a-tooltip>
+                <template slot="title">
+                  <span>Optional IP/CIDR/geoip list, e.g. geoip:cn, 10.0.0.0/8</span>
+                </template>
+                IP
+                <a-icon type="question-circle"></a-icon>
+              </a-tooltip>
+            </template>
+            <a-select mode="tags" v-model="rule.ip" :style="{ width: '100%' }"
+              :dropdown-class-name="themeSwitcher.currentTheme" :token-separators="[',']"
+              placeholder="geoip:cn,10.0.0.0/8">
+            </a-select>
+          </a-form-item>
+
+          <a-form-item label="Block Delay" v-if="rule.action === 'block'">
+            <a-input v-model.trim="rule.blockDelay" placeholder="30-90"></a-input>
+          </a-form-item>
+        </a-form>
         <a-form-item label="Fragment">
           <a-switch :checked="Object.keys(outbound.settings.fragment).length >0"
             @change="checked => outbound.settings.fragment = checked ? new Outbound.FreedomSettings.Fragment() : {}">
