@@ -645,7 +645,7 @@
                       <a-table :row-key="client => client.id" :columns="isMobile ? innerMobileColumns : innerColumns"
                         :data-source="getInboundClients(record)" :pagination=pagination(getInboundClients(record))
                         :style="{ margin: `-10px ${isMobile ? '2px' : '22px'} -11px` }">
-                        {{template "component/aClientTable"}}
+                        {{template "component/aClientTable" .}}
                       </a-table>
                     </template>
                   </a-table>
@@ -668,13 +668,13 @@
 {{template "component/aThemeSwitch" .}}
 {{template "component/aCustomStatistic" .}}
 {{template "component/aPersianDatepicker" .}}
-{{template "modals/inboundModal"}}
-{{template "modals/promptModal"}}
-{{template "modals/qrcodeModal"}}
-{{template "modals/textModal"}}
-{{template "modals/inboundInfoModal"}}
-{{template "modals/clientsModal"}}
-{{template "modals/clientsBulkModal"}}
+{{template "modals/inboundModal" .}}
+{{template "modals/promptModal" .}}
+{{template "modals/qrcodeModal" .}}
+{{template "modals/textModal" .}}
+{{template "modals/inboundInfoModal" .}}
+{{template "modals/clientsModal" .}}
+{{template "modals/clientsBulkModal" .}}
 <a-modal id="copy-clients-modal" :title="copyClientsModal.title" :visible="copyClientsModal.visible"
   :confirm-loading="copyClientsModal.confirmLoading" ok-text='{{ i18n "pages.client.copySelected" }}'
   cancel-text='{{ i18n "close" }}' :class="themeSwitcher.currentTheme" :closable="true" :mask-closable="false"

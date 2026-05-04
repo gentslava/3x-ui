@@ -150,7 +150,11 @@
       },
       initHeadline() {
         const animationDelay = 2000;
-        const headlines = this.$el.querySelectorAll('.headline');
+        const rootEl = this.$el instanceof Element ? this.$el : document.getElementById('app');
+        if (!rootEl || typeof rootEl.querySelectorAll !== 'function') {
+          return;
+        }
+        const headlines = rootEl.querySelectorAll('.headline');
         headlines.forEach((headline) => {
           const first = headline.querySelector('.is-visible');
           if (!first) return;

@@ -3,7 +3,7 @@
     :confirm-loading="outModal.confirmLoading" :closable="true" :mask-closable="false"
     :ok-button-props="{ props: { disabled: !outModal.isValid } }" :style="{ overflow: 'hidden' }"
     :ok-text="outModal.okText" cancel-text='{{ i18n "close" }}' :class="themeSwitcher.currentTheme">
-    {{template "form/outbound"}}
+    {{template "form/outbound" .}}
 </a-modal>
 <script>
     const outModal = {

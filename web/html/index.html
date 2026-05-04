@@ -564,7 +564,7 @@
 {{template "component/aSidebar" .}}
 {{template "component/aThemeSwitch" .}}
 {{template "component/aCustomStatistic" .}}
-{{template "modals/textModal"}}
+{{template "modals/textModal" .}}
 <script>
   // Tiny Sparkline component using an inline SVG polyline
   Vue.component('sparkline', {
@@ -963,6 +963,18 @@
     },
   };
 
+  const escapeHtml = (value) => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   const logModal = {
     visible: false,
     logs: [],
@@ -986,24 +998,28 @@
         if (index > 0) formattedLogs += '<br>';
 
         if (parts.length === 3) {
-          const d = parts[0];
-          const t = parts[1];
-          const level = parts[2];
-          const levelIndex = levels.indexOf(level, levels) || 5;
+          const d = escapeHtml(parts[0]);
+          const t = escapeHtml(parts[1]);
+          const levelRaw = parts[2];
+          const level = escapeHtml(levelRaw);
+          const idx = levels.indexOf(levelRaw);
+          const levelIndex = idx >= 0 ? idx : 5;
 
           //formattedLogs += `<span style="color: gray;">${index + 1}.</span>`;
           formattedLogs += `<span style="color: ${levelColors[0]};">${d} ${t}</span> `;
           formattedLogs += `<span style="color: ${levelColors[levelIndex]}">${level}</span>`;
         } else {
-          const levelIndex = levels.indexOf(data, levels) || 5;
-          formattedLogs += `<span style="color: ${levelColors[levelIndex]}">${data}</span>`;
+          const idx = levels.indexOf(data);
+          const levelIndex = idx >= 0 ? idx : 5;
+          formattedLogs += `<span style="color: ${levelColors[levelIndex]}">${escapeHtml(data)}</span>`;
         }
 
         if (message) {
-          if (message.startsWith("XRAY:"))
-            message = "<b>XRAY: </b>" + message.substring(5);
-          else
-            message = "<b>X-UI: </b>" + message;
+          if (message.startsWith("XRAY:")) {
+            message = "<b>XRAY: </b>" + escapeHtml(message.substring(5));
+          } else {
+            message = "<b>X-UI: </b>" + escapeHtml(message);
+          }
         }
 
         formattedLogs += message ? ' - ' + message : '';
@@ -1063,16 +1079,16 @@
 
         let text = ``;
         if (log.Email !== "") {
-          text = `<td>${log.Email}</td>`;
+          text = `<td>${escapeHtml(log.Email)}</td>`;
         }
 
         formattedLogs += `
 <tr ${outboundColor}>
-    <td><b>${IntlUtil.formatDate(log.DateTime)}</b></td>
-    <td>${log.FromAddress}</td>
-    <td>${log.ToAddress}</td>
-    <td>${log.Inbound}</td>
-    <td>${log.Outbound}</td>
+    <td><b>${escapeHtml(IntlUtil.formatDate(log.DateTime))}</b></td>
+    <td>${escapeHtml(log.FromAddress)}</td>
+    <td>${escapeHtml(log.ToAddress)}</td>
+    <td>${escapeHtml(log.Inbound)}</td>
+    <td>${escapeHtml(log.Outbound)}</td>
     ${text}
 </tr>
 `;

@@ -95,7 +95,7 @@
   }
   const themeSwitcher = createThemeSwitcher();
   Vue.component('a-theme-switch', {
-    template: `{{template "component/themeSwitchTemplate"}}`,
+    template: `{{template "component/themeSwitchTemplate" .}}`,
     data: () => ({
       themeSwitcher
     }),
@@ -107,7 +107,7 @@
     }
   });
   Vue.component('a-theme-switch-login', {
-    template: `{{template "component/themeSwitchTemplateLogin"}}`,
+    template: `{{template "component/themeSwitchTemplateLogin" .}}`,
     data: () => ({
       themeSwitcher
     }),
