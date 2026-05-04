@@ -77,7 +77,7 @@ func (s *SubService) GetSubs(subId string, host string) ([]string, int64, xray.C
 			}
 		}
 		for _, client := range clients {
-			if client.Enable && client.SubID == subId {
+			if client.SubID == subId {
 				link := s.getLink(inbound, client.Email)
 				result = append(result, link)
 				ct := s.getClientTraffics(inbound.ClientStats, client.Email)

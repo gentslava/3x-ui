@@ -1228,7 +1228,7 @@ func (s *InboundService) UpdateInboundClient(data *model.Inbound, clientId strin
 	return needRestart, tx.Save(oldInbound).Error
 }
 
-func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (error, bool) {
+func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (error, bool, bool) {
 	var err error
 	db := database.GetDB()
 	tx := db.Begin()
@@ -1242,11 +1242,11 @@ func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraff
 	}()
 	err = s.addInboundTraffic(tx, inboundTraffics)
 	if err != nil {
-		return err, false
+		return err, false, false
 	}
 	err = s.addClientTraffic(tx, clientTraffics)
 	if err != nil {
-		return err, false
+		return err, false, false
 	}
 
 	needRestart0, count, err := s.autoRenewClients(tx)
@@ -1256,11 +1256,13 @@ func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraff
 		logger.Debugf("%v clients renewed", count)
 	}
 
+	disabledClientsCount := int64(0)
 	needRestart1, count, err := s.disableInvalidClients(tx)
 	if err != nil {
 		logger.Warning("Error in disabling invalid clients:", err)
 	} else if count > 0 {
 		logger.Debugf("%v clients disabled", count)
+		disabledClientsCount = count
 	}
 
 	needRestart2, count, err := s.disableInvalidInbounds(tx)
@@ -1269,7 +1271,7 @@ func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraff
 	} else if count > 0 {
 		logger.Debugf("%v inbounds disabled", count)
 	}
-	return nil, (needRestart0 || needRestart1 || needRestart2)
+	return nil, (needRestart0 || needRestart1 || needRestart2), disabledClientsCount > 0
 }
 
 func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic) error {
@@ -1546,46 +1548,105 @@ func (s *InboundService) disableInvalidClients(tx *gorm.DB) (bool, int64, error)
 	now := time.Now().Unix() * 1000
 	needRestart := false
 
-	if p != nil {
-		var results []struct {
-			Tag   string
-			Email string
-		}
+	var clientsToDisable []struct {
+		InboundId int
+		Tag       string
+		Email     string
+	}
 
-		err := tx.Table("inbounds").
-			Select("inbounds.tag, client_traffics.email").
-			Joins("JOIN client_traffics ON inbounds.id = client_traffics.inbound_id").
-			Where("((client_traffics.total > 0 AND client_traffics.up + client_traffics.down >= client_traffics.total) OR (client_traffics.expiry_time > 0 AND client_traffics.expiry_time <= ?)) AND client_traffics.enable = ?", now, true).
-			Scan(&results).Error
-		if err != nil {
-			return false, 0, err
-		}
+	err := tx.Table("inbounds").
+		Select("inbounds.id as inbound_id, inbounds.tag, client_traffics.email").
+		Joins("JOIN client_traffics ON inbounds.id = client_traffics.inbound_id").
+		Where("((client_traffics.total > 0 AND client_traffics.up + client_traffics.down >= client_traffics.total) OR (client_traffics.expiry_time > 0 AND client_traffics.expiry_time <= ?)) AND client_traffics.enable = ?", now, true).
+		Scan(&clientsToDisable).Error
+	if err != nil {
+		return false, 0, err
+	}
+
+	if p != nil {
 		s.xrayApi.Init(p.GetAPIPort())
-		for _, result := range results {
-			err1 := s.xrayApi.RemoveUser(result.Tag, result.Email)
+		for _, client := range clientsToDisable {
+			err1 := s.xrayApi.RemoveUser(client.Tag, client.Email)
 			if err1 == nil {
-				logger.Debug("Client disabled by api:", result.Email)
+				logger.Debug("Client disabled by api:", client.Email)
 			} else {
-				if strings.Contains(err1.Error(), fmt.Sprintf("User %s not found.", result.Email)) {
+				if strings.Contains(err1.Error(), fmt.Sprintf("User %s not found.", client.Email)) {
 					logger.Debug("User is already disabled. Nothing to do more...")
 				} else {
-					if strings.Contains(err1.Error(), fmt.Sprintf("User %s not found.", result.Email)) {
-						logger.Debug("User is already disabled. Nothing to do more...")
-					} else {
-						logger.Debug("Error in disabling client by api:", err1)
-						needRestart = true
-					}
+					logger.Debug("Error in disabling client by api:", err1)
+					needRestart = true
 				}
 			}
 		}
 		s.xrayApi.Close()
 	}
+
 	result := tx.Model(xray.ClientTraffic{}).
 		Where("((total > 0 and up + down >= total) or (expiry_time > 0 and expiry_time <= ?)) and enable = ?", now, true).
 		Update("enable", false)
-	err := result.Error
+	err = result.Error
 	count := result.RowsAffected
-	return needRestart, count, err
+	if err != nil {
+		return needRestart, count, err
+	}
+
+	// Also set enable=false in inbounds.settings JSON so clients are visibly disabled
+	if len(clientsToDisable) > 0 {
+		inboundEmailMap := make(map[int]map[string]struct{})
+		for _, c := range clientsToDisable {
+			if inboundEmailMap[c.InboundId] == nil {
+				inboundEmailMap[c.InboundId] = make(map[string]struct{})
+			}
+			inboundEmailMap[c.InboundId][c.Email] = struct{}{}
+		}
+		inboundIds := make([]int, 0, len(inboundEmailMap))
+		for id := range inboundEmailMap {
+			inboundIds = append(inboundIds, id)
+		}
+		var inbounds []*model.Inbound
+		if err = tx.Model(model.Inbound{}).Where("id IN ?", inboundIds).Find(&inbounds).Error; err != nil {
+			logger.Warning("disableInvalidClients fetch inbounds:", err)
+			return needRestart, count, nil
+		}
+		for _, inbound := range inbounds {
+			settings := map[string]any{}
+			if jsonErr := json.Unmarshal([]byte(inbound.Settings), &settings); jsonErr != nil {
+				continue
+			}
+			clients, ok := settings["clients"].([]any)
+			if !ok {
+				continue
+			}
+			emailSet := inboundEmailMap[inbound.Id]
+			changed := false
+			for i := range clients {
+				c, ok := clients[i].(map[string]any)
+				if !ok {
+					continue
+				}
+				email, _ := c["email"].(string)
+				if _, shouldDisable := emailSet[email]; shouldDisable {
+					c["enable"] = false
+					c["updated_at"] = time.Now().Unix() * 1000
+					clients[i] = c
+					changed = true
+				}
+			}
+			if changed {
+				settings["clients"] = clients
+				modifiedSettings, jsonErr := json.MarshalIndent(settings, "", "  ")
+				if jsonErr != nil {
+					continue
+				}
+				inbound.Settings = string(modifiedSettings)
+			}
+		}
+		if err = tx.Save(inbounds).Error; err != nil {
+			logger.Warning("disableInvalidClients update inbound settings:", err)
+		}
+	}
+
+	return needRestart, count, nil
 }
 
 func (s *InboundService) GetInboundTags() (string, error) {
