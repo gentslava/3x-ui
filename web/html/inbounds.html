@@ -184,6 +184,8 @@
                     <a-radio-group v-if="enableFilter" v-model="filterBy" @change="filterInbounds" button-style="solid"
                       :size="isMobile ? 'small' : ''">
                       <a-radio-button value>{{ i18n "none" }}</a-radio-button>
+                      <a-radio-button value="active">{{ i18n "subscription.active"
+                        }}</a-radio-button>
                       <a-radio-button value="deactive">{{ i18n "disabled"
                         }}</a-radio-button>
                       <a-radio-button value="depleted">{{ i18n "depleted"
