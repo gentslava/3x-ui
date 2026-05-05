@@ -1747,13 +1747,14 @@ Outbound.VmessSettings = class extends CommonClass {
     }
 };
 Outbound.VLESSSettings = class extends CommonClass {
-    constructor(address, port, id, flow, encryption, testpre = 0, testseed = [900, 500, 900, 256]) {
+    constructor(address, port, id, flow, encryption, reverseTag = '', testpre = 0, testseed = [900, 500, 900, 256]) {
         super();
         this.address = address;
         this.port = port;
         this.id = id;
         this.flow = flow;
         this.encryption = encryption;
+        this.reverseTag = reverseTag;
         this.testpre = testpre;
         this.testseed = testseed;
     }
@@ -1766,6 +1767,7 @@ Outbound.VLESSSettings = class extends CommonClass {
             json.id,
             json.flow,
             json.encryption,
+            json.reverse?.tag || '',
             json.testpre || 0,
             json.testseed && json.testseed.length >= 4 ? json.testseed : [900, 500, 900, 256]
         );
@@ -1779,6 +1781,9 @@ Outbound.VLESSSettings = class extends CommonClass {
             flow: this.flow,
             encryption: this.encryption,
         };
+        if (!ObjectUtil.isEmpty(this.reverseTag)) {
+            result.reverse = { tag: this.reverseTag };
+        }
         // Only include Vision settings when flow is set
         if (this.flow && this.flow !== '') {
             if (this.testpre > 0) {

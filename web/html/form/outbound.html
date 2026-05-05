@@ -342,6 +342,18 @@
           <a-form-item label="encryption">
             <a-input v-model.trim="outbound.settings.encryption"></a-input>
           </a-form-item>
+          <a-form-item>
+            <template slot="label">
+              <a-tooltip>
+                <template slot="title">
+                  <span>{{ i18n "pages.xray.outbound.reverseTagDesc" }}</span>
+                </template>
+                {{ i18n "pages.xray.outbound.reverseTag" }}
+                <a-icon type="question-circle"></a-icon>
+              </a-tooltip>
+            </template>
+            <a-input v-model.trim="outbound.settings.reverseTag" :placeholder='`{{ i18n "pages.xray.outbound.reverseTagPlaceholder" }}`'></a-input>
+          </a-form-item>
         </template>
         <template v-if="outbound.canEnableTlsFlow()">
           <a-form-item label="Flow">
