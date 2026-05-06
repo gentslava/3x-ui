@@ -1747,18 +1747,45 @@ func (s *InboundService) GetInboundTags() (string, error) {
 
 func (s *InboundService) GetClientReverseTags() (string, error) {
 	db := database.GetDB()
-	var rawTags []string
-	err := db.Raw(`
-		SELECT DISTINCT JSON_EXTRACT(client.value, '$.reverse.tag')
-		FROM inbounds,
-			JSON_EACH(JSON_EXTRACT(inbounds.settings, '$.clients')) AS client
-		WHERE inbounds.protocol = 'vless'
-		  AND JSON_EXTRACT(client.value, '$.reverse.tag') IS NOT NULL
-		  AND JSON_EXTRACT(client.value, '$.reverse.tag') != ''
-	`).Scan(&rawTags).Error
+	var inbounds []model.Inbound
+	err := db.Model(model.Inbound{}).Select("settings").Where("protocol = ?", "vless").Find(&inbounds).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return "[]", err
 	}
+
+	tagSet := make(map[string]struct{})
+	for _, inbound := range inbounds {
+		var settings map[string]any
+		if err := json.Unmarshal([]byte(inbound.Settings), &settings); err != nil {
+			continue
+		}
+		clients, ok := settings["clients"].([]any)
+		if !ok {
+			continue
+		}
+		for _, client := range clients {
+			clientMap, ok := client.(map[string]any)
+			if !ok {
+				continue
+			}
+			reverse, ok := clientMap["reverse"].(map[string]any)
+			if !ok {
+				continue
+			}
+			tag, _ := reverse["tag"].(string)
+			tag = strings.TrimSpace(tag)
+			if tag != "" {
+				tagSet[tag] = struct{}{}
+			}
+		}
+	}
+
+	rawTags := make([]string, 0, len(tagSet))
+	for tag := range tagSet {
+		rawTags = append(rawTags, tag)
+	}
+	sort.Strings(rawTags)
+
 	result, _ := json.Marshal(rawTags)
 	return string(result), nil
 }
