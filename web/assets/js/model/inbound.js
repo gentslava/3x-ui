@@ -2617,12 +2617,14 @@ Inbound.VLESSSettings.VLESS = class extends Inbound.ClientBase {
         id = RandomUtil.randomUUID(),
         flow = '',
         reverseTag = '',
+        reverseSniffing = new Sniffing(),
         email, limitIp, totalGB, expiryTime, enable, tgId, subId, comment, reset, created_at, updated_at,
     ) {
         super(email, limitIp, totalGB, expiryTime, enable, tgId, subId, comment, reset, created_at, updated_at);
         this.id = id;
         this.flow = flow;
         this.reverseTag = reverseTag;
+        this.reverseSniffing = reverseSniffing;
     }
 
     static fromJson(json = {}) {
@@ -2630,6 +2632,7 @@ Inbound.VLESSSettings.VLESS = class extends Inbound.ClientBase {
             json.id,
             json.flow,
             json.reverse?.tag ?? '',
+            Sniffing.fromJson(json.reverse?.sniffing || {}),
             ...Inbound.ClientBase.commonArgsFromJson(json),
         );
     }
@@ -2641,7 +2644,9 @@ Inbound.VLESSSettings.VLESS = class extends Inbound.ClientBase {
             ...this._clientBaseToJson(),
         };
         if (this.reverseTag) {
-            json.reverse = { tag: this.reverseTag };
+            json.reverse = {
+                tag: this.reverseTag,
+            };
         }
         return json;
     }
