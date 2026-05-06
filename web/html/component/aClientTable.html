@@ -94,7 +94,7 @@
       </table>
     </template>
     <div class="tr-table-box">
-      <div class="tr-table-rt">[[ SizeFormatter.sizeFormat(getSumStats(record, client.email)) ]]</div>
+      <div class="tr-table-lt">[[ SizeFormatter.sizeFormat(getSumStats(record, client.email)) ]]</div>
       <div class="tr-table-bar" v-if="!client.enable">
         <a-progress :stroke-color="themeSwitcher.isDarkTheme ? 'rgb(72 84 105)' : '#bcbcbc'" :show-info="false" :percent="statsProgress(record, client.email)" />
       </div>
@@ -104,7 +104,7 @@
       <div v-else class="infinite-bar tr-table-bar">
         <a-progress :show-info="false" :percent="100"></a-progress>
       </div>
-      <div class="tr-table-lt">
+      <div class="tr-table-rt">
         <template v-if="client.totalGB > 0">[[ client._totalGB + "GB" ]]</template>
         <span v-else class="tr-infinity-ch">&infin;</span>
       </div>
