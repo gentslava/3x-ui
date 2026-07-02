@@ -667,6 +667,7 @@
         "scanUse": "Dùng",
         "scanRescan": "Quét lại",
         "spiderX": "SpiderX",
+        "spiderXHint": "Hạt giống theo từng client — bảng điều khiển suy ra đường dẫn spx riêng cho mỗi client từ đó; tạo lại để xoay đường dẫn của tất cả",
         "getNewCert": "Lấy chứng chỉ mới",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "Khóa công khai WireGuard",
       "wireguardPreSharedKey": "Khóa chia sẻ trước WireGuard",
       "wireguardAllowedIPs": "IP được phép WireGuard",
+      "wireguardAllowedIPsHint": "Để trống để tự động gán; phân tách các mục bằng dấu phẩy",
       "reverseTag": "Reverse tag",
       "reverseTagPlaceholder": "Reverse tag tùy chọn",
       "telegramId": "ID người dùng Telegram",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "Lỗi SMTP: {{ .Error }}",
       "eventMemoryHigh": "Sử dụng bộ nhớ cao (%)",
       "remarkTemplate": "Mẫu ghi chú",
-      "remarkTemplateDesc": "Khi được đặt, mục này thay thế mô hình ghi chú cho mọi liên kết đăng ký — hãy viết định dạng riêng của bạn bằng các token biến (dùng nút để chèn chúng). Để trống để dùng mô hình ở trên."
+      "remarkTemplateDesc": "Khi được đặt, mục này thay thế mô hình ghi chú cho mọi liên kết đăng ký — hãy viết định dạng riêng của bạn bằng các token biến (dùng nút để chèn chúng). Để trống để dùng mô hình ở trên.",
+      "validation": {
+        "pathLeadingSlash": "Đường dẫn phải bắt đầu bằng /"
+      },
+      "secretClear": "Xóa",
+      "secretClearUndo": "Hoàn tác xóa"
     },
     "xray": {
       "title": "Cài đặt Xray",

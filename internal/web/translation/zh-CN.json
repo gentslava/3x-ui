@@ -666,6 +666,7 @@
         "scanUse": "使用",
         "scanRescan": "重新扫描",
         "spiderX": "SpiderX",
+        "spiderXHint": "按客户端的种子——面板据此为每个客户端派生唯一的 spx 路径；重新生成可轮换所有客户端的路径",
         "getNewCert": "获取新证书",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "WireGuard 公钥",
       "wireguardPreSharedKey": "WireGuard 预共享密钥",
       "wireguardAllowedIPs": "WireGuard 允许的 IP",
+      "wireguardAllowedIPsHint": "留空则自动分配；多个条目用逗号分隔",
       "reverseTag": "反向标签",
       "reverseTagPlaceholder": "可选 Reverse tag",
       "telegramId": "Telegram 用户 ID",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "SMTP 错误：{{ .Error }}",
       "eventMemoryHigh": "内存使用率高 (%)",
       "remarkTemplate": "备注模板",
-      "remarkTemplateDesc": "设置后，将替换每个订阅链接的备注模型 — 使用变量标记编写您自己的格式（用按钮插入它们）。留空则使用上方的模型。"
+      "remarkTemplateDesc": "设置后，将替换每个订阅链接的备注模型 — 使用变量标记编写您自己的格式（用按钮插入它们）。留空则使用上方的模型。",
+      "validation": {
+        "pathLeadingSlash": "路径必须以 / 开头"
+      },
+      "secretClear": "清除",
+      "secretClearUndo": "撤销清除"
     },
     "xray": {
       "importRules": "导入规则",

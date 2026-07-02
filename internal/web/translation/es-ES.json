@@ -667,6 +667,7 @@
         "scanUse": "Usar",
         "scanRescan": "Reescanear",
         "spiderX": "SpiderX",
+        "spiderXHint": "Semilla por cliente: el panel deriva de ella una ruta spx única para cada cliente; regenera para rotar las rutas de todos",
         "getNewCert": "Obtener nuevo cert",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "Clave pública de WireGuard",
       "wireguardPreSharedKey": "Clave precompartida de WireGuard",
       "wireguardAllowedIPs": "IP permitidas de WireGuard",
+      "wireguardAllowedIPsHint": "Déjalo vacío para asignar automáticamente; separa las entradas con comas",
       "reverseTag": "Etiqueta inversa",
       "reverseTagPlaceholder": "Reverse tag opcional",
       "telegramId": "ID de usuario de Telegram",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "Error de SMTP: {{ .Error }}",
       "eventMemoryHigh": "Uso de memoria alto (%)",
       "remarkTemplate": "Plantilla de notas",
-      "remarkTemplateDesc": "Cuando se define, esto reemplaza el modelo de notas para cada enlace de suscripción — escribe tu propio formato con los tokens de variable (usa el botón para insertarlos). Déjalo vacío para usar el modelo anterior."
+      "remarkTemplateDesc": "Cuando se define, esto reemplaza el modelo de notas para cada enlace de suscripción — escribe tu propio formato con los tokens de variable (usa el botón para insertarlos). Déjalo vacío para usar el modelo anterior.",
+      "validation": {
+        "pathLeadingSlash": "La ruta debe comenzar con /"
+      },
+      "secretClear": "Borrar",
+      "secretClearUndo": "Deshacer borrado"
     },
     "xray": {
       "title": "Xray Configuración",

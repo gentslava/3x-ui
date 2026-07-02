@@ -646,6 +646,7 @@
         "scanUse": "Обрати",
         "scanRescan": "Пересканувати",
         "spiderX": "SpiderX",
+        "spiderXHint": "Сід на клієнта — панель формує з нього унікальний шлях spx для кожного клієнта; перегенеруйте, щоб оновити шляхи всіх",
         "getNewCert": "Отримати новий сертифікат",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "Публічний ключ WireGuard",
       "wireguardPreSharedKey": "Спільний ключ WireGuard",
       "wireguardAllowedIPs": "Дозволені IP WireGuard",
+      "wireguardAllowedIPsHint": "Залиште порожнім для автопризначення; розділяйте записи комами",
       "reverseTag": "Зворотний тег",
       "reverseTagPlaceholder": "Необов'язковий Reverse tag",
       "telegramId": "ID користувача Telegram",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "Помилка SMTP: {{ .Error }}",
       "eventMemoryHigh": "Високе використання пам'яті (%)",
       "remarkTemplate": "Шаблон примітки",
-      "remarkTemplateDesc": "Якщо задано, це замінює модель примітки для кожного посилання підписки — напишіть власний формат із токенами змінних (використовуйте кнопку для їх вставлення). Залиште порожнім, щоб використовувати модель вище."
+      "remarkTemplateDesc": "Якщо задано, це замінює модель примітки для кожного посилання підписки — напишіть власний формат із токенами змінних (використовуйте кнопку для їх вставлення). Залиште порожнім, щоб використовувати модель вище.",
+      "validation": {
+        "pathLeadingSlash": "Шлях має починатися з /"
+      },
+      "secretClear": "Очистити",
+      "secretClearUndo": "Скасувати очищення"
     },
     "xray": {
       "title": "Xray конфігурації",

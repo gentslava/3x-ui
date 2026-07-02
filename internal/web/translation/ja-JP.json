@@ -667,6 +667,7 @@
         "scanUse": "使用",
         "scanRescan": "再スキャン",
         "spiderX": "SpiderX",
+        "spiderXHint": "クライアントごとのシード。パネルはこれから各クライアント固有の spx パスを生成します。再生成で全員のパスを更新します",
         "getNewCert": "新しい証明書を取得",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "WireGuard 公開鍵",
       "wireguardPreSharedKey": "WireGuard 事前共有鍵",
       "wireguardAllowedIPs": "WireGuard 許可IP",
+      "wireguardAllowedIPsHint": "空欄で自動割り当て。複数指定はカンマ区切り",
       "reverseTag": "Reverse tag",
       "reverseTagPlaceholder": "任意の Reverse tag",
       "telegramId": "Telegram ユーザー ID",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "SMTPエラー: {{ .Error }}",
       "eventMemoryHigh": "メモリ使用率が高い (%)",
       "remarkTemplate": "備考テンプレート",
-      "remarkTemplateDesc": "設定すると、すべてのサブスクリプションリンクの備考モデルを置き換えます — 変数トークンを使って独自の形式を記述してください（ボタンで挿入できます）。空欄にすると上記のモデルが使用されます。"
+      "remarkTemplateDesc": "設定すると、すべてのサブスクリプションリンクの備考モデルを置き換えます — 変数トークンを使って独自の形式を記述してください（ボタンで挿入できます）。空欄にすると上記のモデルが使用されます。",
+      "validation": {
+        "pathLeadingSlash": "パスは / で始まる必要があります"
+      },
+      "secretClear": "クリア",
+      "secretClearUndo": "クリアを取り消す"
     },
     "xray": {
       "title": "Xray 設定",

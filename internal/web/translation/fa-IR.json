@@ -658,6 +658,7 @@
         "scanUse": "استفاده",
         "scanRescan": "اسکن مجدد",
         "spiderX": "SpiderX",
+        "spiderXHint": "دانه‌ی هر کاربر — پنل از روی آن مسیر spx یکتا برای هر کاربر می‌سازد؛ برای چرخش مسیر همه، دوباره تولید کنید",
         "getNewCert": "دریافت گواهی جدید",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "کلید عمومی وایرگارد",
       "wireguardPreSharedKey": "کلید پیش‌اشتراکی وایرگارد",
       "wireguardAllowedIPs": "آی‌پی‌های مجاز وایرگارد",
+      "wireguardAllowedIPsHint": "برای تخصیص خودکار خالی بگذارید؛ ورودی‌ها را با کاما جدا کنید",
       "reverseTag": "تگ معکوس",
       "reverseTagPlaceholder": "Reverse tag اختیاری",
       "telegramId": "شناسه کاربر تلگرام",
@@ -1394,7 +1396,12 @@
       "smtpErrorRelay": "سرور ارسال از این آدرس را رد می‌کند",
       "smtpErrorEof": "اتصال توسط سرور بسته شد",
       "smtpErrorUnknown": "خطای SMTP: {{ .Error }}",
-      "eventMemoryHigh": "مصرف حافظه بالا (%)"
+      "eventMemoryHigh": "مصرف حافظه بالا (%)",
+      "validation": {
+        "pathLeadingSlash": "مسیر باید با / شروع شود"
+      },
+      "secretClear": "پاک کردن",
+      "secretClearUndo": "لغو پاک کردن"
     },
     "xray": {
       "title": "پیکربندی ایکس‌ری",

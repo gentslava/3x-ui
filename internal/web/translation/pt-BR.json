@@ -667,6 +667,7 @@
         "scanUse": "Usar",
         "scanRescan": "Reescanear",
         "spiderX": "SpiderX",
+        "spiderXHint": "Semente por cliente — o painel deriva dela um caminho spx único para cada cliente; regenere para rotacionar os caminhos de todos",
         "getNewCert": "Obter novo certificado",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "Chave pública do WireGuard",
       "wireguardPreSharedKey": "Chave pré-compartilhada do WireGuard",
       "wireguardAllowedIPs": "IPs permitidos do WireGuard",
+      "wireguardAllowedIPsHint": "Deixe vazio para atribuir automaticamente; separe as entradas com vírgulas",
       "reverseTag": "Tag reversa",
       "reverseTagPlaceholder": "Reverse tag opcional",
       "telegramId": "ID de usuário do Telegram",
@@ -1394,7 +1396,12 @@
       "smtpErrorUnknown": "Erro de SMTP: {{ .Error }}",
       "eventMemoryHigh": "Uso de memória alto (%)",
       "remarkTemplate": "Modelo de Observação",
-      "remarkTemplateDesc": "Quando definido, isto substitui o modelo de observação de cada link de assinatura — escreva seu próprio formato com os tokens de variáveis (use o botão para inseri-los). Deixe vazio para usar o modelo acima."
+      "remarkTemplateDesc": "Quando definido, isto substitui o modelo de observação de cada link de assinatura — escreva seu próprio formato com os tokens de variáveis (use o botão para inseri-los). Deixe vazio para usar o modelo acima.",
+      "validation": {
+        "pathLeadingSlash": "O caminho deve começar com /"
+      },
+      "secretClear": "Limpar",
+      "secretClearUndo": "Desfazer limpeza"
     },
     "xray": {
       "title": "Configurações Xray",

@@ -658,6 +658,7 @@
         "scanUse": "Use",
         "scanRescan": "Rescan",
         "spiderX": "SpiderX",
+        "spiderXHint": "Per-client seed — the panel derives a unique spx path for each client from it; regenerate to rotate everyone's paths",
         "getNewCert": "Get New Cert",
         "mldsa65Seed": "mldsa65 Seed",
         "mldsa65Verify": "mldsa65 Verify",
@@ -900,6 +901,7 @@
       "wireguardPublicKey": "WireGuard Public Key",
       "wireguardPreSharedKey": "WireGuard Pre-Shared Key",
       "wireguardAllowedIPs": "WireGuard Allowed IPs",
+      "wireguardAllowedIPsHint": "Leave empty to auto-assign; separate entries with commas",
       "reverseTag": "Reverse tag",
       "reverseTagPlaceholder": "Optional reverse tag",
       "telegramId": "Telegram user ID",
@@ -1510,7 +1512,12 @@
       "smtpErrorRelay": "Server rejects sending from this address",
       "smtpErrorEof": "Connection closed by server",
       "smtpErrorUnknown": "SMTP error: {{ .Error }}",
-      "eventMemoryHigh": "Memory high (%)"
+      "eventMemoryHigh": "Memory high (%)",
+      "validation": {
+        "pathLeadingSlash": "Path must start with /"
+      },
+      "secretClear": "Clear",
+      "secretClearUndo": "Undo clear"
     },
     "xray": {
       "title": "Xray Configs",

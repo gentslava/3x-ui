@@ -19,19 +19,15 @@ import (
 )
 
 func (s *InboundService) AddTraffic(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (needRestart bool, clientsDisabled bool, err error) {
-	var disabledNodeIDs []int
 	err = submitTrafficWrite(func() error {
 		var inner error
-		needRestart, clientsDisabled, disabledNodeIDs, inner = s.addTrafficLocked(inboundTraffics, clientTraffics)
+		needRestart, clientsDisabled, inner = s.addTrafficLocked(inboundTraffics, clientTraffics)
 		return inner
 	})
-	if err == nil && len(disabledNodeIDs) > 0 {
-		s.restartRemoteNodesOnDisable(disabledNodeIDs)
-	}
 	return
 }
 
-func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (bool, bool, []int, error) {
+func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clientTraffics []*xray.ClientTraffic) (bool, bool, error) {
 	var err error
 	db := database.GetDB()
 	tx := db.Begin()
@@ -45,11 +41,11 @@ func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clien
 	}()
 	err = s.addInboundTraffic(tx, inboundTraffics)
 	if err != nil {
-		return false, false, nil, err
+		return false, false, err
 	}
 	err = s.addClientTraffic(tx, clientTraffics)
 	if err != nil {
-		return false, false, nil, err
+		return false, false, err
 	}
 
 	needRestart0, count, err := s.autoRenewClients(tx)
@@ -60,7 +56,7 @@ func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clien
 	}
 
 	disabledClientsCount := int64(0)
-	needRestart1, count, disabledNodeIDs, err := s.disableInvalidClients(tx)
+	needRestart1, count, err := s.disableInvalidClients(tx)
 	if err != nil {
 		logger.Warning("Error in disabling invalid clients:", err)
 	} else if count > 0 {
@@ -74,7 +70,7 @@ func (s *InboundService) addTrafficLocked(inboundTraffics []*xray.Traffic, clien
 	} else if count > 0 {
 		logger.Debugf("%v inbounds disabled", count)
 	}
-	return needRestart0 || needRestart1 || needRestart2, disabledClientsCount > 0, disabledNodeIDs, nil
+	return needRestart0 || needRestart1 || needRestart2, disabledClientsCount > 0, nil
 }
 
 func (s *InboundService) addInboundTraffic(tx *gorm.DB, traffics []*xray.Traffic) error {
@@ -474,6 +470,9 @@ func (s *InboundService) UpdateClientStat(tx *gorm.DB, email string, client *mod
 }
 
 func (s *InboundService) DelClientStat(tx *gorm.DB, email string) error {
+	if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{email}); err != nil {
+		return err
+	}
 	if err := tx.Where("email = ?", email).Delete(xray.ClientTraffic{}).Error; err != nil {
 		return err
 	}
@@ -484,6 +483,9 @@ func (s *InboundService) DelClientStat(tx *gorm.DB, email string) error {
 }
 
 func (s *InboundService) delClientStatsByEmails(tx *gorm.DB, emails []string) error {
+	if err := adjustGroupBaselinesForRemovedTraffic(tx, emails); err != nil {
+		return err
+	}
 	const chunk = 400
 	for start := 0; start < len(emails); start += chunk {
 		end := min(start+chunk, len(emails))
@@ -503,16 +505,20 @@ func (s *InboundService) delClientStatsByEmails(tx *gorm.DB, emails []string) er
 
 func (s *InboundService) ResetClientTrafficByEmail(clientEmail string) error {
 	return submitTrafficWrite(func() error {
-		db := database.GetDB()
-		if err := clearGlobalTraffic(db, clientEmail); err != nil {
-			return err
-		}
-		if err := db.Model(xray.ClientTraffic{}).
-			Where("email = ?", clientEmail).
-			Updates(map[string]any{"enable": true, "up": 0, "down": 0}).Error; err != nil {
-			return err
-		}
-		return db.Where("email = ?", clientEmail).Delete(&model.NodeClientTraffic{}).Error
+		return database.GetDB().Transaction(func(tx *gorm.DB) error {
+			if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{clientEmail}); err != nil {
+				return err
+			}
+			if err := clearGlobalTraffic(tx, clientEmail); err != nil {
+				return err
+			}
+			if err := tx.Model(xray.ClientTraffic{}).
+				Where("email = ?", clientEmail).
+				Updates(map[string]any{"enable": true, "up": 0, "down": 0}).Error; err != nil {
+				return err
+			}
+			return tx.Where("email = ?", clientEmail).Delete(&model.NodeClientTraffic{}).Error
+		})
 	})
 }
 
@@ -596,6 +602,9 @@ func (s *InboundService) resetClientTrafficLocked(id int, clientEmail string) (b
 		return false, err
 	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := adjustGroupBaselinesForRemovedTraffic(tx, []string{clientEmail}); err != nil {
+			return err
+		}
 		if err := tx.Save(traffic).Error; err != nil {
 			return err
 		}
