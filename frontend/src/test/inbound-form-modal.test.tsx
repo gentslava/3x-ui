@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, onTestFinished, vi } from 'vitest';
 import { screen, act, render, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
 import InboundFormModal from '@/pages/inbounds/form/InboundFormModal';
@@ -167,6 +167,41 @@ describe('InboundFormModal', () => {
     expect((shareAddrInput as HTMLInputElement).value).toBe('edge.example.test');
   });
 
+  it('uses Hosts instead of showing the custom share address fields for MTProto', async () => {
+    renderWithProviders(
+      <InboundFormModal
+        open
+        mode="edit"
+        dbInbound={
+          new DBInbound({
+            id: 2,
+            port: 4060,
+            listen: '',
+            protocol: 'mtproto',
+            remark: 'proxy',
+            enable: true,
+            settings: { clients: [] },
+            streamSettings: {},
+            sniffing: { enabled: false },
+            nodeId: null,
+            shareAddrStrategy: 'custom',
+            shareAddr: 'proxy.example.test',
+          })
+        }
+        dbInbounds={[]}
+        availableNodes={[]}
+        onClose={() => {}}
+        onSaved={() => {}}
+      />,
+    );
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(fieldLabels()).not.toContain('Share address strategy');
+    expect(screen.queryByDisplayValue('proxy.example.test')).toBeNull();
+  });
+
   it('keeps the persisted node share strategy through the nodes-loading race (#5375)', async () => {
     const node = { id: 1, name: 'arm2', enable: true, status: 'online' } as never;
     const buildInbound = () =>
@@ -240,6 +275,34 @@ describe('InboundFormModal', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
+  it('blocks adding TLS without a certificate and directs the user to Security', async () => {
+    const post = vi.mocked(HttpUtil.post);
+    post.mockClear();
+    messageError.mockClear();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    onTestFinished(() => consoleError.mockRestore());
+    renderModal();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Security' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'TLS' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Basics' }));
+    fireEvent.click(primaryButton());
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: 'Security' }).getAttribute('aria-selected')).toBe(
+        'true',
+      );
+      expect(messageError).toHaveBeenCalledWith(
+        expect.stringContaining('TLS certificate 1: Import a TLS certificate'),
+      );
+    });
+    expect(consoleError).toHaveBeenCalledWith('[InboundFormModal] schema validation failed:', [
+      'TLS certificate 1: Import a TLS certificate or enter its file path before saving',
+      'TLS certificate 1: Import the TLS private key or enter its file path before saving',
+    ]);
+    expect(post).not.toHaveBeenCalled();
+  });
+
   it('submits a valid clone-like Reality inbound', async () => {
     const post = vi.mocked(HttpUtil.post);
     post.mockClear();
@@ -253,5 +316,35 @@ describe('InboundFormModal', () => {
         expect.objectContaining({ enable: false, port: 41234, protocol: 'vless' }),
       );
     });
+  });
+
+  // Clients and enable change through their own endpoints; the server keeps the
+  // stored ones, so the edit form must neither send nor validate its stale copy.
+  it('edit save neither sends nor validates the clients it loaded', async () => {
+    const post = vi.mocked(HttpUtil.post);
+    post.mockClear();
+    const dbInbound = cloneLikeVlessInbound('example.com:443');
+    const legacy = new DBInbound({
+      ...dbInbound,
+      settings: {
+        ...(dbInbound.settings as Record<string, unknown>),
+        clients: [{ email: 'legacy', id: '' }],
+      },
+    });
+    renderCloneLikeEdit(legacy);
+
+    fireEvent.click(primaryButton());
+
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    const payload = post.mock.calls[0][1] as { settings: string };
+    expect(JSON.parse(payload.settings)).not.toHaveProperty('clients');
+  });
+
+  it('offers the enable switch when adding an inbound but not when editing one', () => {
+    renderModal();
+    expect(document.getElementById('inbound-enable')).not.toBeNull();
+    cleanup();
+    renderCloneLikeEdit(cloneLikeVlessInbound('example.com:443'));
+    expect(document.getElementById('inbound-enable')).toBeNull();
   });
 });

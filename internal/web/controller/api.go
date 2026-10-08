@@ -61,7 +61,11 @@ func (a *APIController) checkAPIAuth(c *gin.Context) {
 		}
 	}
 	if !session.IsLogin(c) {
-		if c.GetHeader("X-Requested-With") == "XMLHttpRequest" {
+		// A presented Bearer token is not an anonymous scan: return 401 so
+		// callers can distinguish a bad/disabled token from a wrong base path
+		// (NoRoute still 404s). XHR keeps 401; bare unauthenticated stays 404.
+		authHdr := c.GetHeader("Authorization")
+		if strings.HasPrefix(authHdr, "Bearer ") || c.GetHeader("X-Requested-With") == "XMLHttpRequest" {
 			c.AbortWithStatus(http.StatusUnauthorized)
 		} else {
 			c.AbortWithStatus(http.StatusNotFound)
@@ -94,6 +98,7 @@ var nodeSyncScopeAllow = map[string]map[string]struct{}{
 	"/inbounds/add":                {http.MethodPost: {}},
 	"/inbounds/del/:id":            {http.MethodPost: {}},
 	"/inbounds/update/:id":         {http.MethodPost: {}},
+	"/inbounds/:id/subSortIndex":   {http.MethodPost: {}},
 	"/clients/add":                 {http.MethodPost: {}},
 	"/clients/del/:email":          {http.MethodPost: {}},
 	"/clients/:email/detach":       {http.MethodPost: {}},
@@ -102,11 +107,13 @@ var nodeSyncScopeAllow = map[string]map[string]struct{}{
 	"/server/getWebCertFiles":      {http.MethodGet: {}},
 	"/server/descendants":          {http.MethodGet: {}},
 	"/clients/resetTraffic/:email": {http.MethodPost: {}},
+	"/clients/bulkResetTraffic":    {http.MethodPost: {}},
 	"/inbounds/resetAllTraffics":   {http.MethodPost: {}},
 	"/inbounds/:id/resetTraffic":   {http.MethodPost: {}},
 	"/clients/onlinesByGuid":       {http.MethodPost: {}},
 	"/clients/onlines":             {http.MethodPost: {}},
 	"/clients/lastOnline":          {http.MethodPost: {}},
+	"/clients/activeInbounds":      {http.MethodPost: {}},
 	"/inbounds/pushClientTraffics": {http.MethodPost: {}},
 	"/server/clientIps":            {http.MethodGet: {}, http.MethodPost: {}},
 	"/clients/clientIpsByGuid":     {http.MethodPost: {}},

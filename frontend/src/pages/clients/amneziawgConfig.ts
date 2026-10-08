@@ -1,11 +1,13 @@
+import type { HostEndpoint } from '@/lib/hosts/host-link';
 import { formatInboundLabel } from '@/lib/inbounds/label';
 import { preferPublicHost, resolveShareHost } from '@/lib/xray/inbound-link';
+import { effectiveMtu } from '@/lib/xray/amneziawg-obfuscation';
 import type { ClientRecord, InboundOption } from '@/hooks/useClients';
 
 // AmneziaWG clients are wire-identical to WireGuard clients (same
 // privateKey/publicKey/allowedIPs/preSharedKey/keepAlive fields on
 // model.Client — see wireguardConfig.ts's isWireguardClient), so this duck
-// type can't tell the two protocols apart on its own; findAmneziaWGInbound's
+// type can't tell the two protocols apart on its own; findAmneziaWGInbounds's
 // protocol==='amneziawg' filter below is what actually disambiguates.
 export function isAmneziaWGClient(client: ClientRecord | null | undefined): boolean {
   if (!client) return false;
@@ -18,13 +20,13 @@ export function isAmneziaWGClient(client: ClientRecord | null | undefined): bool
   );
 }
 
-export function findAmneziaWGInbound(
+export function findAmneziaWGInbounds(
   client: ClientRecord | null | undefined,
   inboundsById: Record<number, InboundOption>,
-): InboundOption | undefined {
+): InboundOption[] {
   return (client?.inboundIds || [])
-    .map((id) => inboundsById[id])
-    .find((ib) => ib?.protocol === 'amneziawg');
+    .map((id) => inboundsById?.[id])
+    .filter((ib): ib is InboundOption => ib?.protocol === 'amneziawg');
 }
 
 // h4Line renders one H magic-header line, matching the Go backend's
@@ -43,17 +45,18 @@ export function buildAmneziaWGClientConfig(
   host = window.location.hostname,
   publicHost = '',
   addressOverride = '',
+  hostEndpoint?: HostEndpoint,
 ): string {
   const server = inbound?.awgServer;
-  const endpointHost = resolveShareHost(
-    inbound ?? {},
-    inbound?.nodeAddress ?? '',
-    preferPublicHost(host, publicHost),
-  );
+  const endpointHost =
+    hostEndpoint?.dest ||
+    resolveShareHost(inbound ?? {}, inbound?.nodeAddress ?? '', preferPublicHost(host, publicHost));
   const address = addressOverride || client.allowedIPs || '10.8.1.2/32';
-  const endpoint = `${endpointHost}:${inbound?.port || ''}`;
+  const endpoint = `${endpointHost}:${hostEndpoint?.port || inbound?.port || ''}`;
   const inboundName = inbound ? formatInboundLabel(inbound.tag, inbound.remark) : '';
-  const remark = [inboundName, client.email, client.comment].filter(Boolean).join(' - ');
+  const remark = [inboundName, hostEndpoint?.remark, client.email, client.comment]
+    .filter(Boolean)
+    .join(' - ');
 
   // These land unescaped in [Interface]; a newline here would inject a
   // config line (e.g. a rogue PostUp) into the downloaded .conf.
@@ -65,7 +68,7 @@ export function buildAmneziaWGClientConfig(
   const dnsParts = [server?.primaryDns, server?.secondaryDns].filter((v) => !!v && v.trim() !== '');
   const lines = ['[Interface]', `PrivateKey = ${privateKey}`, `Address = ${address}`];
   if (dnsParts.length > 0) lines.push(`DNS = ${dnsParts.join(', ')}`);
-  if (server?.mtu && server.mtu > 0) lines.push(`MTU = ${server.mtu}`);
+  lines.push(`MTU = ${effectiveMtu(server?.mtu, server?.s4)}`);
 
   // AmneziaWG obfuscation parameters — must match the server's values.
   lines.push(`Jc = ${server?.jc ?? 5}`);

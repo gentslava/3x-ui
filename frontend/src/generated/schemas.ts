@@ -5,15 +5,55 @@ export const SCHEMAS: Record<string, unknown> = {
       "datepicker": {
         "type": "string"
       },
+      "discordAdminIds": {
+        "type": "string"
+      },
+      "discordBotBackup": {
+        "type": "boolean"
+      },
+      "discordBotEnable": {
+        "type": "boolean"
+      },
+      "discordBotToken": {
+        "type": "string"
+      },
+      "discordChannelId": {
+        "type": "string"
+      },
+      "discordCpu": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "discordEnabledEvents": {
+        "type": "string"
+      },
+      "discordLang": {
+        "type": "string"
+      },
+      "discordMemory": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "discordRunTime": {
+        "type": "string"
+      },
       "expireDiff": {
         "minimum": 0,
         "type": "integer"
+      },
+      "externalSubUserAgent": {
+        "type": "string"
       },
       "externalTrafficInformEnable": {
         "type": "boolean"
       },
       "externalTrafficInformURI": {
         "type": "string"
+      },
+      "happLinkEnable": {
+        "type": "boolean"
       },
       "ipLimitAllowlist": {
         "type": "string"
@@ -99,6 +139,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "panelOutbound": {
         "type": "string"
       },
+      "realityScanCandidates": {
+        "type": "string"
+      },
       "remarkTemplate": {
         "type": "string"
       },
@@ -155,6 +198,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subAnnounce": {
         "type": "string"
       },
+      "subCalendarExpireInclusive": {
+        "type": "boolean"
+      },
       "subCertFile": {
         "type": "string"
       },
@@ -191,20 +237,187 @@ export const SCHEMAS: Record<string, unknown> = {
       "subEncrypt": {
         "type": "boolean"
       },
+      "subExpiredTemplate": {
+        "type": "string"
+      },
+      "subHappAlwaysHwid": {
+        "type": "boolean"
+      },
+      "subHappAutoConnect": {
+        "type": "boolean"
+      },
+      "subHappAutoConnectType": {
+        "type": "string"
+      },
+      "subHappAutoDetect": {
+        "description": "Happ client customization settings (app-management / routing / UX).",
+        "type": "boolean"
+      },
+      "subHappColorProfile": {
+        "type": "string"
+      },
+      "subHappExcludeApns": {
+        "type": "boolean"
+      },
+      "subHappExcludeRoutes": {
+        "type": "string"
+      },
+      "subHappFallbackUrl": {
+        "type": "string"
+      },
+      "subHappLocalProxyAuth": {
+        "type": "string"
+      },
+      "subHappNewUrl": {
+        "type": "string"
+      },
+      "subHappNoLimit": {
+        "type": "boolean"
+      },
+      "subHappNotificationExpire": {
+        "type": "boolean"
+      },
+      "subHappPerAppList": {
+        "type": "string"
+      },
+      "subHappPerAppMode": {
+        "type": "string"
+      },
+      "subHappPingType": {
+        "type": "string"
+      },
+      "subHappProviderId": {
+        "type": "string"
+      },
+      "subHappSubExpire": {
+        "type": "boolean"
+      },
+      "subHappSubExpireButtonLink": {
+        "type": "string"
+      },
+      "subHappSubInfoButtonLink": {
+        "type": "string"
+      },
+      "subHappSubInfoButtonText": {
+        "type": "string"
+      },
+      "subHappSubInfoColor": {
+        "type": "string"
+      },
+      "subHappSubInfoText": {
+        "type": "string"
+      },
+      "subHappTunMode": {
+        "type": "string"
+      },
+      "subHappTunType": {
+        "type": "string"
+      },
       "subHideSettings": {
         "type": "boolean"
+      },
+      "subIncyAnnounceUrl": {
+        "type": "string"
+      },
+      "subIncyAppAutoDetect": {
+        "description": "Incy client customization settings (app-management). A \"\" value omits\nthe header so the subscriber's own app setting is left alone.",
+        "type": "boolean"
+      },
+      "subIncyBannerBgColor": {
+        "type": "string"
+      },
+      "subIncyBannerButtonColor": {
+        "type": "string"
+      },
+      "subIncyBannerButtonText": {
+        "type": "string"
+      },
+      "subIncyBannerButtonUrl": {
+        "type": "string"
+      },
+      "subIncyBannerText": {
+        "type": "string"
       },
       "subIncyEnableRouting": {
         "type": "boolean"
       },
+      "subIncyFragmentInterval": {
+        "type": "string"
+      },
+      "subIncyFragmentLength": {
+        "type": "string"
+      },
+      "subIncyFragmentPackets": {
+        "type": "string"
+      },
+      "subIncyFragmentationEnable": {
+        "type": "string"
+      },
+      "subIncyHideCheck": {
+        "type": "string"
+      },
+      "subIncyHideUrl": {
+        "type": "string"
+      },
+      "subIncyNoLimitEnabled": {
+        "type": "string"
+      },
+      "subIncyNoisesDelay": {
+        "type": "string"
+      },
+      "subIncyNoisesEnable": {
+        "type": "string"
+      },
+      "subIncyNoisesPacket": {
+        "type": "string"
+      },
+      "subIncyNoisesType": {
+        "type": "string"
+      },
+      "subIncyPerAppEnable": {
+        "type": "string"
+      },
+      "subIncyPerAppList": {
+        "type": "string"
+      },
+      "subIncyPerAppMode": {
+        "type": "string"
+      },
+      "subIncyPremiumUrl": {
+        "type": "string"
+      },
+      "subIncyProfileDescription": {
+        "type": "string"
+      },
+      "subIncyResolveDnsDomain": {
+        "type": "string"
+      },
+      "subIncyResolveDnsIp": {
+        "type": "string"
+      },
+      "subIncyResolveEnable": {
+        "type": "string"
+      },
       "subIncyRoutingRules": {
         "type": "string"
+      },
+      "subIncySortOrder": {
+        "type": "string"
+      },
+      "subIncySupportEmail": {
+        "type": "string"
+      },
+      "subInfoNodeEnable": {
+        "type": "boolean"
       },
       "subJsonAlwaysArray": {
         "type": "boolean"
       },
       "subJsonAutoDetect": {
         "type": "boolean"
+      },
+      "subJsonDns": {
+        "type": "string"
       },
       "subJsonEnable": {
         "type": "boolean"
@@ -219,6 +432,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "subJsonPath": {
+        "type": "string"
+      },
+      "subJsonRoutingRules": {
         "type": "string"
       },
       "subJsonRules": {
@@ -244,6 +460,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
+      "subProfileMode": {
+        "type": "string"
+      },
       "subProfileUrl": {
         "type": "string"
       },
@@ -260,6 +479,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "subTitle": {
+        "type": "string"
+      },
+      "subTrafficDepletedTemplate": {
         "type": "string"
       },
       "subURI": {
@@ -351,9 +573,21 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "datepicker",
+      "discordAdminIds",
+      "discordBotBackup",
+      "discordBotEnable",
+      "discordBotToken",
+      "discordChannelId",
+      "discordCpu",
+      "discordEnabledEvents",
+      "discordLang",
+      "discordMemory",
+      "discordRunTime",
       "expireDiff",
+      "externalSubUserAgent",
       "externalTrafficInformEnable",
       "externalTrafficInformURI",
+      "happLinkEnable",
       "ipLimitAllowlist",
       "ldapAutoCreate",
       "ldapAutoDelete",
@@ -379,6 +613,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "outboundDownThreshold",
       "pageSize",
       "panelOutbound",
+      "realityScanCandidates",
       "remarkTemplate",
       "restartXrayOnClientDisable",
       "sessionMaxAge",
@@ -395,6 +630,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpTo",
       "smtpUsername",
       "subAnnounce",
+      "subCalendarExpireInclusive",
       "subCertFile",
       "subClashAutoDetect",
       "subClashEnable",
@@ -407,16 +643,72 @@ export const SCHEMAS: Record<string, unknown> = {
       "subEnable",
       "subEnableRouting",
       "subEncrypt",
+      "subExpiredTemplate",
+      "subHappAlwaysHwid",
+      "subHappAutoConnect",
+      "subHappAutoConnectType",
+      "subHappAutoDetect",
+      "subHappColorProfile",
+      "subHappExcludeApns",
+      "subHappExcludeRoutes",
+      "subHappFallbackUrl",
+      "subHappLocalProxyAuth",
+      "subHappNewUrl",
+      "subHappNoLimit",
+      "subHappNotificationExpire",
+      "subHappPerAppList",
+      "subHappPerAppMode",
+      "subHappPingType",
+      "subHappProviderId",
+      "subHappSubExpire",
+      "subHappSubExpireButtonLink",
+      "subHappSubInfoButtonLink",
+      "subHappSubInfoButtonText",
+      "subHappSubInfoColor",
+      "subHappSubInfoText",
+      "subHappTunMode",
+      "subHappTunType",
       "subHideSettings",
+      "subIncyAnnounceUrl",
+      "subIncyAppAutoDetect",
+      "subIncyBannerBgColor",
+      "subIncyBannerButtonColor",
+      "subIncyBannerButtonText",
+      "subIncyBannerButtonUrl",
+      "subIncyBannerText",
       "subIncyEnableRouting",
+      "subIncyFragmentInterval",
+      "subIncyFragmentLength",
+      "subIncyFragmentPackets",
+      "subIncyFragmentationEnable",
+      "subIncyHideCheck",
+      "subIncyHideUrl",
+      "subIncyNoLimitEnabled",
+      "subIncyNoisesDelay",
+      "subIncyNoisesEnable",
+      "subIncyNoisesPacket",
+      "subIncyNoisesType",
+      "subIncyPerAppEnable",
+      "subIncyPerAppList",
+      "subIncyPerAppMode",
+      "subIncyPremiumUrl",
+      "subIncyProfileDescription",
+      "subIncyResolveDnsDomain",
+      "subIncyResolveDnsIp",
+      "subIncyResolveEnable",
       "subIncyRoutingRules",
+      "subIncySortOrder",
+      "subIncySupportEmail",
+      "subInfoNodeEnable",
       "subJsonAlwaysArray",
       "subJsonAutoDetect",
+      "subJsonDns",
       "subJsonEnable",
       "subJsonFinalMask",
       "subJsonMux",
       "subJsonObservatory",
       "subJsonPath",
+      "subJsonRoutingRules",
       "subJsonRules",
       "subJsonURI",
       "subJsonUserAgentRegex",
@@ -424,12 +716,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "subListen",
       "subPath",
       "subPort",
+      "subProfileMode",
       "subProfileUrl",
       "subRoutingRules",
       "subShowIdentityOnAllLinks",
       "subSupportUrl",
       "subThemeDir",
       "subTitle",
+      "subTrafficDepletedTemplate",
       "subURI",
       "subUpdates",
       "tgBotAPIServer",
@@ -463,9 +757,46 @@ export const SCHEMAS: Record<string, unknown> = {
       "datepicker": {
         "type": "string"
       },
+      "discordAdminIds": {
+        "type": "string"
+      },
+      "discordBotBackup": {
+        "type": "boolean"
+      },
+      "discordBotEnable": {
+        "type": "boolean"
+      },
+      "discordBotToken": {
+        "type": "string"
+      },
+      "discordChannelId": {
+        "type": "string"
+      },
+      "discordCpu": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "discordEnabledEvents": {
+        "type": "string"
+      },
+      "discordLang": {
+        "type": "string"
+      },
+      "discordMemory": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "discordRunTime": {
+        "type": "string"
+      },
       "expireDiff": {
         "minimum": 0,
         "type": "integer"
+      },
+      "externalSubUserAgent": {
+        "type": "string"
       },
       "externalTrafficInformEnable": {
         "type": "boolean"
@@ -473,7 +804,13 @@ export const SCHEMAS: Record<string, unknown> = {
       "externalTrafficInformURI": {
         "type": "string"
       },
+      "happLinkEnable": {
+        "type": "boolean"
+      },
       "hasApiToken": {
+        "type": "boolean"
+      },
+      "hasDiscordBotToken": {
         "type": "boolean"
       },
       "hasLdapPassword": {
@@ -578,6 +915,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "panelOutbound": {
         "type": "string"
       },
+      "realityScanCandidates": {
+        "type": "string"
+      },
       "remarkTemplate": {
         "type": "string"
       },
@@ -634,6 +974,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "subAnnounce": {
         "type": "string"
       },
+      "subCalendarExpireInclusive": {
+        "type": "boolean"
+      },
       "subCertFile": {
         "type": "string"
       },
@@ -670,20 +1013,187 @@ export const SCHEMAS: Record<string, unknown> = {
       "subEncrypt": {
         "type": "boolean"
       },
+      "subExpiredTemplate": {
+        "type": "string"
+      },
+      "subHappAlwaysHwid": {
+        "type": "boolean"
+      },
+      "subHappAutoConnect": {
+        "type": "boolean"
+      },
+      "subHappAutoConnectType": {
+        "type": "string"
+      },
+      "subHappAutoDetect": {
+        "description": "Happ client customization settings (app-management / routing / UX).",
+        "type": "boolean"
+      },
+      "subHappColorProfile": {
+        "type": "string"
+      },
+      "subHappExcludeApns": {
+        "type": "boolean"
+      },
+      "subHappExcludeRoutes": {
+        "type": "string"
+      },
+      "subHappFallbackUrl": {
+        "type": "string"
+      },
+      "subHappLocalProxyAuth": {
+        "type": "string"
+      },
+      "subHappNewUrl": {
+        "type": "string"
+      },
+      "subHappNoLimit": {
+        "type": "boolean"
+      },
+      "subHappNotificationExpire": {
+        "type": "boolean"
+      },
+      "subHappPerAppList": {
+        "type": "string"
+      },
+      "subHappPerAppMode": {
+        "type": "string"
+      },
+      "subHappPingType": {
+        "type": "string"
+      },
+      "subHappProviderId": {
+        "type": "string"
+      },
+      "subHappSubExpire": {
+        "type": "boolean"
+      },
+      "subHappSubExpireButtonLink": {
+        "type": "string"
+      },
+      "subHappSubInfoButtonLink": {
+        "type": "string"
+      },
+      "subHappSubInfoButtonText": {
+        "type": "string"
+      },
+      "subHappSubInfoColor": {
+        "type": "string"
+      },
+      "subHappSubInfoText": {
+        "type": "string"
+      },
+      "subHappTunMode": {
+        "type": "string"
+      },
+      "subHappTunType": {
+        "type": "string"
+      },
       "subHideSettings": {
         "type": "boolean"
+      },
+      "subIncyAnnounceUrl": {
+        "type": "string"
+      },
+      "subIncyAppAutoDetect": {
+        "description": "Incy client customization settings (app-management). A \"\" value omits\nthe header so the subscriber's own app setting is left alone.",
+        "type": "boolean"
+      },
+      "subIncyBannerBgColor": {
+        "type": "string"
+      },
+      "subIncyBannerButtonColor": {
+        "type": "string"
+      },
+      "subIncyBannerButtonText": {
+        "type": "string"
+      },
+      "subIncyBannerButtonUrl": {
+        "type": "string"
+      },
+      "subIncyBannerText": {
+        "type": "string"
       },
       "subIncyEnableRouting": {
         "type": "boolean"
       },
+      "subIncyFragmentInterval": {
+        "type": "string"
+      },
+      "subIncyFragmentLength": {
+        "type": "string"
+      },
+      "subIncyFragmentPackets": {
+        "type": "string"
+      },
+      "subIncyFragmentationEnable": {
+        "type": "string"
+      },
+      "subIncyHideCheck": {
+        "type": "string"
+      },
+      "subIncyHideUrl": {
+        "type": "string"
+      },
+      "subIncyNoLimitEnabled": {
+        "type": "string"
+      },
+      "subIncyNoisesDelay": {
+        "type": "string"
+      },
+      "subIncyNoisesEnable": {
+        "type": "string"
+      },
+      "subIncyNoisesPacket": {
+        "type": "string"
+      },
+      "subIncyNoisesType": {
+        "type": "string"
+      },
+      "subIncyPerAppEnable": {
+        "type": "string"
+      },
+      "subIncyPerAppList": {
+        "type": "string"
+      },
+      "subIncyPerAppMode": {
+        "type": "string"
+      },
+      "subIncyPremiumUrl": {
+        "type": "string"
+      },
+      "subIncyProfileDescription": {
+        "type": "string"
+      },
+      "subIncyResolveDnsDomain": {
+        "type": "string"
+      },
+      "subIncyResolveDnsIp": {
+        "type": "string"
+      },
+      "subIncyResolveEnable": {
+        "type": "string"
+      },
       "subIncyRoutingRules": {
         "type": "string"
+      },
+      "subIncySortOrder": {
+        "type": "string"
+      },
+      "subIncySupportEmail": {
+        "type": "string"
+      },
+      "subInfoNodeEnable": {
+        "type": "boolean"
       },
       "subJsonAlwaysArray": {
         "type": "boolean"
       },
       "subJsonAutoDetect": {
         "type": "boolean"
+      },
+      "subJsonDns": {
+        "type": "string"
       },
       "subJsonEnable": {
         "type": "boolean"
@@ -698,6 +1208,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "subJsonPath": {
+        "type": "string"
+      },
+      "subJsonRoutingRules": {
         "type": "string"
       },
       "subJsonRules": {
@@ -723,6 +1236,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "minimum": 1,
         "type": "integer"
       },
+      "subProfileMode": {
+        "type": "string"
+      },
       "subProfileUrl": {
         "type": "string"
       },
@@ -739,6 +1255,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "subTitle": {
+        "type": "string"
+      },
+      "subTrafficDepletedTemplate": {
         "type": "string"
       },
       "subURI": {
@@ -830,10 +1349,23 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "datepicker",
+      "discordAdminIds",
+      "discordBotBackup",
+      "discordBotEnable",
+      "discordBotToken",
+      "discordChannelId",
+      "discordCpu",
+      "discordEnabledEvents",
+      "discordLang",
+      "discordMemory",
+      "discordRunTime",
       "expireDiff",
+      "externalSubUserAgent",
       "externalTrafficInformEnable",
       "externalTrafficInformURI",
+      "happLinkEnable",
       "hasApiToken",
+      "hasDiscordBotToken",
       "hasLdapPassword",
       "hasNordSecret",
       "hasSmtpPassword",
@@ -865,6 +1397,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "outboundDownThreshold",
       "pageSize",
       "panelOutbound",
+      "realityScanCandidates",
       "remarkTemplate",
       "restartXrayOnClientDisable",
       "sessionMaxAge",
@@ -881,6 +1414,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "smtpTo",
       "smtpUsername",
       "subAnnounce",
+      "subCalendarExpireInclusive",
       "subCertFile",
       "subClashAutoDetect",
       "subClashEnable",
@@ -893,16 +1427,72 @@ export const SCHEMAS: Record<string, unknown> = {
       "subEnable",
       "subEnableRouting",
       "subEncrypt",
+      "subExpiredTemplate",
+      "subHappAlwaysHwid",
+      "subHappAutoConnect",
+      "subHappAutoConnectType",
+      "subHappAutoDetect",
+      "subHappColorProfile",
+      "subHappExcludeApns",
+      "subHappExcludeRoutes",
+      "subHappFallbackUrl",
+      "subHappLocalProxyAuth",
+      "subHappNewUrl",
+      "subHappNoLimit",
+      "subHappNotificationExpire",
+      "subHappPerAppList",
+      "subHappPerAppMode",
+      "subHappPingType",
+      "subHappProviderId",
+      "subHappSubExpire",
+      "subHappSubExpireButtonLink",
+      "subHappSubInfoButtonLink",
+      "subHappSubInfoButtonText",
+      "subHappSubInfoColor",
+      "subHappSubInfoText",
+      "subHappTunMode",
+      "subHappTunType",
       "subHideSettings",
+      "subIncyAnnounceUrl",
+      "subIncyAppAutoDetect",
+      "subIncyBannerBgColor",
+      "subIncyBannerButtonColor",
+      "subIncyBannerButtonText",
+      "subIncyBannerButtonUrl",
+      "subIncyBannerText",
       "subIncyEnableRouting",
+      "subIncyFragmentInterval",
+      "subIncyFragmentLength",
+      "subIncyFragmentPackets",
+      "subIncyFragmentationEnable",
+      "subIncyHideCheck",
+      "subIncyHideUrl",
+      "subIncyNoLimitEnabled",
+      "subIncyNoisesDelay",
+      "subIncyNoisesEnable",
+      "subIncyNoisesPacket",
+      "subIncyNoisesType",
+      "subIncyPerAppEnable",
+      "subIncyPerAppList",
+      "subIncyPerAppMode",
+      "subIncyPremiumUrl",
+      "subIncyProfileDescription",
+      "subIncyResolveDnsDomain",
+      "subIncyResolveDnsIp",
+      "subIncyResolveEnable",
       "subIncyRoutingRules",
+      "subIncySortOrder",
+      "subIncySupportEmail",
+      "subInfoNodeEnable",
       "subJsonAlwaysArray",
       "subJsonAutoDetect",
+      "subJsonDns",
       "subJsonEnable",
       "subJsonFinalMask",
       "subJsonMux",
       "subJsonObservatory",
       "subJsonPath",
+      "subJsonRoutingRules",
       "subJsonRules",
       "subJsonURI",
       "subJsonUserAgentRegex",
@@ -910,12 +1500,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "subListen",
       "subPath",
       "subPort",
+      "subProfileMode",
       "subProfileUrl",
       "subRoutingRules",
       "subShowIdentityOnAllLinks",
       "subSupportUrl",
       "subThemeDir",
       "subTitle",
+      "subTrafficDepletedTemplate",
       "subURI",
       "subUpdates",
       "tgBotAPIServer",
@@ -1121,6 +1713,8 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "string"
       },
       "keepAlive": {
+        "description": "Seconds between PersistentKeepalive packets; 0 sends none, omit to keep the stored value",
+        "nullable": true,
         "type": "integer"
       },
       "limitIp": {
@@ -1145,11 +1739,15 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "integer"
       },
       "resetDay": {
-        "description": "Calendar renewal day 1-31, 0 = interval mode",
+        "description": "Calendar renewal day 1-31, 0 disables monthly renewal",
         "type": "integer"
       },
       "resetMax": {
         "description": "Max auto-renew count, 0 = unlimited",
+        "type": "integer"
+      },
+      "resetWeekday": {
+        "description": "Calendar weekday 1-7 (Mon-Sun), 0 disables weekly renewal",
         "type": "integer"
       },
       "reverse": {
@@ -1214,6 +1812,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "reset",
       "resetDay",
       "resetMax",
+      "resetWeekday",
       "security",
       "subId",
       "tgId",
@@ -1242,6 +1841,56 @@ export const SCHEMAS: Record<string, unknown> = {
       "createdAt",
       "flowOverride",
       "inboundId"
+    ],
+    "type": "object"
+  },
+  "ClientPageResponse": {
+    "description": "ClientPageResponse is the shape returned by ListPaged. `Total` is the\nrow count in the DB; `Filtered` is the count after Search/Filter/Protocol\nwere applied, before pagination. The page contains at most PageSize items.\nSummary is computed across the full DB row set so dashboard counters\non the clients page stay stable as the user paginates/filters.",
+    "properties": {
+      "filtered": {
+        "example": 47,
+        "type": "integer"
+      },
+      "groups": {
+        "example": [
+          "staff",
+          "trial"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "items": {
+        "items": {
+          "$ref": "#/components/schemas/ClientSlim"
+        },
+        "type": "array"
+      },
+      "page": {
+        "example": 1,
+        "type": "integer"
+      },
+      "pageSize": {
+        "example": 25,
+        "type": "integer"
+      },
+      "summary": {
+        "$ref": "#/components/schemas/ClientsSummary"
+      },
+      "total": {
+        "example": 2000,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filtered",
+      "groups",
+      "items",
+      "page",
+      "pageSize",
+      "summary",
+      "total"
     ],
     "type": "object"
   },
@@ -1315,6 +1964,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "resetMax": {
         "type": "integer"
       },
+      "resetWeekday": {
+        "type": "integer"
+      },
       "reverse": {},
       "secret": {
         "type": "string"
@@ -1370,6 +2022,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "reset",
       "resetDay",
       "resetMax",
+      "resetWeekday",
       "reverse",
       "secret",
       "security",
@@ -1383,6 +2036,97 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "ClientRenewalPreview": {
+    "properties": {
+      "canRenew": {
+        "example": true,
+        "type": "boolean"
+      },
+      "delayedStart": {
+        "example": false,
+        "type": "boolean"
+      },
+      "nextExpiry": {
+        "example": "2030-02-01T00:00:00Z",
+        "type": "string"
+      },
+      "renewAt": {
+        "example": "2030-01-01T00:00:00Z",
+        "type": "string"
+      },
+      "renewals": {
+        "example": 1,
+        "type": "integer"
+      },
+      "suggestedExpiry": {
+        "example": "2030-01-01T00:00:00Z",
+        "type": "string"
+      },
+      "suggestedExpiryTime": {
+        "example": 1893456000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "timeZone": {
+        "example": "UTC",
+        "type": "string"
+      },
+      "validThrough": {
+        "example": "2029-12-31T23:59:59Z",
+        "type": "string"
+      }
+    },
+    "required": [
+      "canRenew",
+      "delayedStart",
+      "nextExpiry",
+      "renewAt",
+      "renewals",
+      "suggestedExpiry",
+      "suggestedExpiryTime",
+      "timeZone",
+      "validThrough"
+    ],
+    "type": "object"
+  },
+  "ClientRenewalPreviewRequest": {
+    "properties": {
+      "expiryTime": {
+        "example": 1893456000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "reset": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetCount": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetDay": {
+        "example": 1,
+        "type": "integer"
+      },
+      "resetMax": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetWeekday": {
+        "example": 0,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "expiryTime",
+      "reset",
+      "resetCount",
+      "resetDay",
+      "resetMax",
+      "resetWeekday"
+    ],
+    "type": "object"
+  },
   "ClientReverse": {
     "properties": {
       "tag": {
@@ -1391,6 +2135,110 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "tag"
+    ],
+    "type": "object"
+  },
+  "ClientSlim": {
+    "description": "ClientSlim is the row-shape used by the clients page. It drops fields the\ntable never reads (UUID, password, auth, flow, security, reverse, tgId)\nso the list payload stays compact even when the panel manages thousands\nof clients. Modals that need the full record still call /get/:email.",
+    "properties": {
+      "comment": {
+        "example": "Primary device",
+        "type": "string"
+      },
+      "createdAt": {
+        "example": 1735000000000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "email": {
+        "example": "alice@example.com",
+        "type": "string"
+      },
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "expiryTime": {
+        "example": 1735689600000,
+        "format": "int64",
+        "type": "integer"
+      },
+      "group": {
+        "example": "staff",
+        "type": "string"
+      },
+      "inboundIds": {
+        "example": [
+          3,
+          5
+        ],
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "limitHwid": {
+        "example": 0,
+        "type": "integer"
+      },
+      "limitIp": {
+        "example": 0,
+        "type": "integer"
+      },
+      "reset": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetDay": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetMax": {
+        "example": 0,
+        "type": "integer"
+      },
+      "resetWeekday": {
+        "example": 0,
+        "type": "integer"
+      },
+      "subId": {
+        "example": "abcd1234",
+        "type": "string"
+      },
+      "totalGB": {
+        "example": 53687091200,
+        "format": "int64",
+        "type": "integer"
+      },
+      "traffic": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ClientTraffic"
+          }
+        ],
+        "nullable": true
+      },
+      "updatedAt": {
+        "example": 1735100000000,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "createdAt",
+      "email",
+      "enable",
+      "expiryTime",
+      "inboundIds",
+      "limitHwid",
+      "limitIp",
+      "reset",
+      "resetDay",
+      "resetMax",
+      "resetWeekday",
+      "subId",
+      "totalGB",
+      "updatedAt"
     ],
     "type": "object"
   },
@@ -1443,12 +2291,17 @@ export const SCHEMAS: Record<string, unknown> = {
         "type": "integer"
       },
       "resetDay": {
-        "description": "ResetDay renews on that day of each calendar month instead of every\nReset days; 0 keeps the interval behaviour.",
+        "description": "ResetDay renews on that day of each calendar month instead of every\nReset days; 0 disables monthly renewal.",
         "example": 0,
         "type": "integer"
       },
       "resetMax": {
         "description": "ResetMax caps how many times auto-renew may fire; 0 means no cap.",
+        "example": 0,
+        "type": "integer"
+      },
+      "resetWeekday": {
+        "description": "ResetWeekday renews weekly at panel-local midnight: 1 Monday through 7 Sunday.",
         "example": 0,
         "type": "integer"
       },
@@ -1484,10 +2337,85 @@ export const SCHEMAS: Record<string, unknown> = {
       "resetCount",
       "resetDay",
       "resetMax",
+      "resetWeekday",
       "subId",
       "total",
       "up",
       "uuid"
+    ],
+    "type": "object"
+  },
+  "ClientsSummary": {
+    "description": "ClientsSummary collects per-bucket counts plus the matching email lists so\nthe clients page can render the dashboard stat cards and their hover\npopovers without shipping the full client array. The counters are exact;\nthe lists stop at clientSummaryEmailCap entries and only back the popovers.",
+    "properties": {
+      "active": {
+        "example": 1850,
+        "type": "integer"
+      },
+      "deactive": {
+        "example": [
+          "bob@example.com"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "deactiveCount": {
+        "example": 150,
+        "type": "integer"
+      },
+      "depleted": {
+        "example": [],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "depletedCount": {
+        "example": 0,
+        "type": "integer"
+      },
+      "expiring": {
+        "example": [],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "expiringCount": {
+        "example": 0,
+        "type": "integer"
+      },
+      "online": {
+        "example": [
+          "alice@example.com"
+        ],
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "onlineCount": {
+        "example": 1,
+        "type": "integer"
+      },
+      "total": {
+        "example": 2000,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "deactive",
+      "deactiveCount",
+      "depleted",
+      "depletedCount",
+      "expiring",
+      "expiringCount",
+      "online",
+      "onlineCount",
+      "total"
     ],
     "type": "object"
   },
@@ -1657,6 +2585,18 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "HappLinkResult": {
+    "properties": {
+      "encryptedLink": {
+        "example": "happ://crypt5/example",
+        "type": "string"
+      }
+    },
+    "required": [
+      "encryptedLink"
+    ],
+    "type": "object"
+  },
   "HistoryOfSeeders": {
     "description": "HistoryOfSeeders tracks which database seeders have been executed to prevent re-running.",
     "properties": {
@@ -1687,6 +2627,9 @@ export const SCHEMAS: Record<string, unknown> = {
           "type": "string"
         },
         "type": "array"
+      },
+      "cipherSuites": {
+        "type": "string"
       },
       "createdAt": {
         "format": "int64",
@@ -1821,6 +2764,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "address",
       "allowInsecure",
       "alpn",
+      "cipherSuites",
       "createdAt",
       "echConfigList",
       "excludeFromSubTypes",
@@ -1864,6 +2808,9 @@ export const SCHEMAS: Record<string, unknown> = {
           "type": "string"
         },
         "type": "array"
+      },
+      "cipherSuites": {
+        "type": "string"
       },
       "echConfigList": {
         "type": "string"
@@ -1991,6 +2938,7 @@ export const SCHEMAS: Record<string, unknown> = {
     "required": [
       "allowInsecure",
       "alpn",
+      "cipherSuites",
       "echConfigList",
       "excludeFromSubTypes",
       "finalMask",
@@ -2023,6 +2971,39 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "HwidSlotStatus": {
+    "description": "HwidSlotStatus is the aggregate device-slot view exposed to subscribers:\ncounters only, no hwid value or hash, no email, no device metadata.",
+    "properties": {
+      "active": {
+        "example": true,
+        "type": "boolean"
+      },
+      "full": {
+        "example": false,
+        "type": "boolean"
+      },
+      "limit": {
+        "example": 2,
+        "type": "integer"
+      },
+      "registered": {
+        "example": 1,
+        "type": "integer"
+      },
+      "remaining": {
+        "example": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "active",
+      "full",
+      "limit",
+      "registered",
+      "remaining"
+    ],
+    "type": "object"
+  },
   "Inbound": {
     "description": "Inbound represents an Xray inbound configuration with traffic statistics and settings.",
     "properties": {
@@ -2045,6 +3026,11 @@ export const SCHEMAS: Record<string, unknown> = {
       "enable": {
         "description": "Whether the inbound is enabled",
         "example": true,
+        "type": "boolean"
+      },
+      "excludeFromSub": {
+        "description": "Whether to omit this inbound from subscription output while keeping it operational",
+        "example": false,
         "type": "boolean"
       },
       "expiryTime": {
@@ -2102,7 +3088,8 @@ export const SCHEMAS: Record<string, unknown> = {
           "tunnel",
           "tun",
           "mtproto",
-          "amneziawg"
+          "amneziawg",
+          "tuic"
         ],
         "example": "vless",
         "type": "string"
@@ -2127,9 +3114,8 @@ export const SCHEMAS: Record<string, unknown> = {
       "sniffing": {},
       "streamSettings": {},
       "subSortIndex": {
-        "description": "1-based sort order of this inbound's links in subscription output only (lower first; ties by id)",
+        "description": "Sort order of this inbound's links in subscription output only (lower first; negatives allowed; 0/omitted → 1; ties by id)",
         "example": 1,
-        "minimum": 1,
         "type": "integer"
       },
       "tag": {
@@ -2170,6 +3156,7 @@ export const SCHEMAS: Record<string, unknown> = {
       "disableFlow",
       "down",
       "enable",
+      "excludeFromSub",
       "expiryTime",
       "id",
       "lastTrafficResetTime",
@@ -2277,6 +3264,9 @@ export const SCHEMAS: Record<string, unknown> = {
       "mtprotoDomain": {
         "type": "string"
       },
+      "network": {
+        "type": "string"
+      },
       "nodeAddress": {
         "description": "Share-host resolution inputs, mirroring the subscription's\nresolveInboundAddress so the clients page renders a node-managed WireGuard\nEndpoint that points at the node, not the master panel. NodeAddress is the\nhosting node's externally reachable address (empty for this panel's own\ninbounds); Listen and ShareAddrStrategy/ShareAddr feed the same\nnode→listen→custom fallback the share/QR links already use.",
         "type": "string"
@@ -2298,6 +3288,9 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "VLESS-443",
         "type": "string"
       },
+      "security": {
+        "type": "string"
+      },
       "shareAddr": {
         "type": "string"
       },
@@ -2314,6 +3307,14 @@ export const SCHEMAS: Record<string, unknown> = {
       "tlsFlowCapable": {
         "example": true,
         "type": "boolean"
+      },
+      "tuicServer": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/TuicServerSettings"
+          }
+        ],
+        "nullable": true
       },
       "wgDns": {
         "type": "string"
@@ -2337,6 +3338,118 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "InboundTrafficSummary": {
+    "properties": {
+      "down": {
+        "example": 2097152,
+        "format": "int64",
+        "type": "integer"
+      },
+      "enable": {
+        "example": true,
+        "type": "boolean"
+      },
+      "id": {
+        "example": 1,
+        "type": "integer"
+      },
+      "total": {
+        "example": 10737418240,
+        "format": "int64",
+        "type": "integer"
+      },
+      "up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "down",
+      "enable",
+      "id",
+      "total",
+      "up"
+    ],
+    "type": "object"
+  },
+  "LogEntry": {
+    "properties": {
+      "DateTime": {
+        "example": "2025-01-01T12:00:00Z",
+        "format": "date-time",
+        "type": "string"
+      },
+      "Email": {
+        "example": "alice@example.com",
+        "type": "string"
+      },
+      "Event": {
+        "example": 0,
+        "type": "integer"
+      },
+      "FromAddress": {
+        "example": "192.0.2.10:54321",
+        "type": "string"
+      },
+      "Inbound": {
+        "example": "inbound-443",
+        "type": "string"
+      },
+      "Outbound": {
+        "example": "direct",
+        "type": "string"
+      },
+      "ToAddress": {
+        "example": "example.com:443",
+        "type": "string"
+      }
+    },
+    "required": [
+      "DateTime",
+      "Email",
+      "Event",
+      "FromAddress",
+      "Inbound",
+      "Outbound",
+      "ToAddress"
+    ],
+    "type": "object"
+  },
+  "MLDSA65Response": {
+    "properties": {
+      "seed": {
+        "example": "mldsa65-seed",
+        "type": "string"
+      },
+      "verify": {
+        "example": "mldsa65-verify",
+        "type": "string"
+      }
+    },
+    "required": [
+      "seed",
+      "verify"
+    ],
+    "type": "object"
+  },
+  "MLKEM768Response": {
+    "properties": {
+      "client": {
+        "example": "mlkem768-client",
+        "type": "string"
+      },
+      "seed": {
+        "example": "mlkem768-seed",
+        "type": "string"
+      }
+    },
+    "required": [
+      "client",
+      "seed"
+    ],
+    "type": "object"
+  },
   "Msg": {
     "properties": {
       "msg": {
@@ -2351,6 +3464,18 @@ export const SCHEMAS: Record<string, unknown> = {
       "msg",
       "obj",
       "success"
+    ],
+    "type": "object"
+  },
+  "NewUUIDResponse": {
+    "properties": {
+      "uuid": {
+        "example": "550e8400-e29b-41d4-a716-446655440000",
+        "type": "string"
+      }
+    },
+    "required": [
+      "uuid"
     ],
     "type": "object"
   },
@@ -3069,6 +4194,11 @@ export const SCHEMAS: Record<string, unknown> = {
         "example": "h2",
         "type": "string"
       },
+      "certChainBytes": {
+        "description": "CertChainBytes is the sum of DER lengths of the presented peer chain.\nxray-core ML-DSA-65 REALITY needs \u003e= 3500 bytes (constant lives in xray-core).",
+        "example": 3427,
+        "type": "integer"
+      },
       "certChainValid": {
         "description": "CertChainValid ignores the name: a trusted chain presented for other names\nstill has serverNames the panel can offer instead of the failing SNI.",
         "example": true,
@@ -3151,6 +4281,7 @@ export const SCHEMAS: Record<string, unknown> = {
     },
     "required": [
       "alpn",
+      "certChainBytes",
       "certChainValid",
       "certIssuer",
       "certSubject",
@@ -3337,6 +4468,90 @@ export const SCHEMAS: Record<string, unknown> = {
     ],
     "type": "object"
   },
+  "Sponsor": {
+    "description": "Sponsor is one paid placement published in the repo's sponsors.json.",
+    "properties": {
+      "enable": {
+        "example": true,
+        "nullable": true,
+        "type": "boolean"
+      },
+      "from": {
+        "example": "2026-10-01T00:00:00Z",
+        "format": "date-time",
+        "nullable": true,
+        "type": "string"
+      },
+      "id": {
+        "example": "acme-2026-10",
+        "type": "string"
+      },
+      "link": {
+        "example": "https://acme.example/?utm_source=3x-ui",
+        "type": "string"
+      },
+      "logo": {
+        "example": "/sponsors/logo/acme.png",
+        "type": "string"
+      },
+      "name": {
+        "example": "Acme VPS",
+        "type": "string"
+      },
+      "slots": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "text": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "until": {
+        "example": "2026-11-01T00:00:00Z",
+        "format": "date-time",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "link",
+      "name",
+      "slots",
+      "text",
+      "title",
+      "until"
+    ],
+    "type": "object"
+  },
+  "SponsorList": {
+    "description": "SponsorList is the active sponsor set plus the contact link for new sponsors.",
+    "properties": {
+      "contact": {
+        "example": "https://t.me/example",
+        "type": "string"
+      },
+      "sponsors": {
+        "items": {
+          "$ref": "#/components/schemas/Sponsor"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "sponsors"
+    ],
+    "type": "object"
+  },
   "SubBalancer": {
     "description": "SubBalancer is one extra JSON-subscription config document whose members are\nthe selected inbounds' proxy outbounds. SortOrder shares SubSortIndex semantics.",
     "properties": {
@@ -3363,6 +4578,13 @@ export const SCHEMAS: Record<string, unknown> = {
           "type": "integer"
         },
         "type": "array"
+      },
+      "memberWeights": {
+        "additionalProperties": {
+          "type": "number"
+        },
+        "description": "inboundId -\u003e leastLoad weight; absent entries mean 1.0. Only meaningful\nwith Strategy \"leastLoad\" — xray ignores costs on every other strategy.",
+        "type": "object"
       },
       "remark": {
         "example": "auto-fastest",
@@ -3399,6 +4621,113 @@ export const SCHEMAS: Record<string, unknown> = {
       "sortOrder",
       "strategy",
       "updatedAt"
+    ],
+    "type": "object"
+  },
+  "Traffic": {
+    "description": "Traffic represents network traffic statistics for Xray connections.\nIt tracks upload and download bytes for inbound or outbound traffic.",
+    "properties": {
+      "Down": {
+        "example": 2097152,
+        "format": "int64",
+        "type": "integer"
+      },
+      "IsInbound": {
+        "example": true,
+        "type": "boolean"
+      },
+      "IsOutbound": {
+        "example": false,
+        "type": "boolean"
+      },
+      "Tag": {
+        "example": "inbound-443",
+        "type": "string"
+      },
+      "Up": {
+        "example": 1048576,
+        "format": "int64",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "Down",
+      "IsInbound",
+      "IsOutbound",
+      "Tag",
+      "Up"
+    ],
+    "type": "object"
+  },
+  "TuicClientSettings": {
+    "properties": {
+      "email": {
+        "type": "string"
+      },
+      "password": {
+        "type": "string"
+      },
+      "uuid": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "email",
+      "password",
+      "uuid"
+    ],
+    "type": "object"
+  },
+  "TuicServerSettings": {
+    "properties": {
+      "alpn": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "authentication_timeout": {
+        "type": "integer"
+      },
+      "certificate": {
+        "type": "string"
+      },
+      "congestion_control": {
+        "type": "string"
+      },
+      "log_level": {
+        "type": "string"
+      },
+      "max_idle_time": {
+        "type": "integer"
+      },
+      "max_udp_relay_packet_size": {
+        "type": "integer"
+      },
+      "private_key": {
+        "type": "string"
+      },
+      "sni": {
+        "type": "string"
+      },
+      "udp_relay_mode": {
+        "type": "string"
+      },
+      "zero_rtt_handshake": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "alpn",
+      "authentication_timeout",
+      "certificate",
+      "congestion_control",
+      "log_level",
+      "max_idle_time",
+      "max_udp_relay_packet_size",
+      "private_key",
+      "udp_relay_mode",
+      "zero_rtt_handshake"
     ],
     "type": "object"
   },

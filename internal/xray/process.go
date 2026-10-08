@@ -316,6 +316,22 @@ func (p *Process) SetConfig(config *Config) {
 	p.config = config
 }
 
+// PersistConfig writes the current configuration snapshot to the config file,
+// keeping it in step after a hot apply (Start only writes it on a cold start).
+func (p *Process) PersistConfig() error {
+	p.mu.RLock()
+	data, err := json.MarshalIndent(p.config, "", "  ")
+	path := p.configPath
+	p.mu.RUnlock()
+	if err != nil {
+		return common.NewErrorf("Failed to generate XRAY configuration files: %v", err)
+	}
+	if path == "" {
+		path = GetConfigPath()
+	}
+	return writeFileAtomic(path, data, 0o600)
+}
+
 // GetOnlineClients returns the union of locally-online clients and
 // node-online clients from every registered remote panel. Dedupes by
 // email so a client connected to both a local and a node-managed inbound
@@ -536,6 +552,23 @@ func (p *Process) ClearNodeOnlineClients(nodeID int) {
 	defer p.onlineMu.Unlock()
 	delete(p.nodeOnlineTrees, nodeID)
 	delete(p.nodeActiveInboundTrees, nodeID)
+}
+
+// RetainNodeOnlineClients drops the subtree of every direct node keep rejects: nodes
+// the master stopped syncing without a failed probe (disabled, offline, deleted).
+func (p *Process) RetainNodeOnlineClients(keep func(nodeID int) bool) {
+	p.onlineMu.Lock()
+	defer p.onlineMu.Unlock()
+	for nodeID := range p.nodeOnlineTrees {
+		if !keep(nodeID) {
+			delete(p.nodeOnlineTrees, nodeID)
+		}
+	}
+	for nodeID := range p.nodeActiveInboundTrees {
+		if !keep(nodeID) {
+			delete(p.nodeActiveInboundTrees, nodeID)
+		}
+	}
 }
 
 // GetUptime returns the uptime of the Xray process in seconds.

@@ -14,12 +14,22 @@ import (
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/logger"
+	wgutil "github.com/mhsanaei/3x-ui/v3/internal/util/wireguard"
 )
+
+// A real X25519 pair, so PublicKeyFromPrivate agrees with the stored value.
+var awgTestPrivateKey, awgTestPublicKey = func() (string, string) {
+	priv, pub, err := wgutil.GenerateWireguardKeypair()
+	if err != nil {
+		panic(err)
+	}
+	return priv, pub
+}()
 
 func TestCheckForwardedPortsConflict_EmptySpecNoConflict(t *testing.T) {
 	setupConflictDB(t)
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -31,7 +41,7 @@ func TestCheckForwardedPortsConflict_EmptySpecNoConflict(t *testing.T) {
 func TestCheckForwardedPortsConflict_CollidesWithPanelPort(t *testing.T) {
 	setupConflictDB(t)
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -48,7 +58,7 @@ func TestCheckForwardedPortsConflict_CollidesWithEnabledInboundPort(t *testing.T
 	seedInboundConflict(t, "vless-8080", "0.0.0.0", 8080, model.VLESS, `{"network":"tcp"}`, `{}`)
 
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -66,7 +76,7 @@ func TestCheckForwardedPortsConflict_IgnoresDisabledInboundPort(t *testing.T) {
 	}
 
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -80,7 +90,7 @@ func TestCheckForwardedPortsConflict_NoCollisionWhenPortsDontOverlap(t *testing.
 	seedInboundConflict(t, "vless-8080", "0.0.0.0", 8080, model.VLESS, `{"network":"tcp"}`, `{}`)
 
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -100,7 +110,7 @@ func TestCheckForwardedPortsConflict_IgnoresPortOnDifferentNode(t *testing.T) {
 	seedInboundConflictNode(t, "node1-8080", "0.0.0.0", 8080, model.VLESS, `{"network":"tcp"}`, `{}`, new(1))
 
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -134,7 +144,7 @@ func TestNormalizeAmneziaWGSettings_GeneratesFull31Set(t *testing.T) {
 	setupConflictDB(t)
 	svc := &InboundService{}
 	inbound := &model.Inbound{Protocol: model.AmneziaWG, Port: 51820, Settings: ""}
-	if err := svc.normalizeAmneziaWGSettings(inbound); err != nil {
+	if err := svc.normalizeAmneziaWGSettings(inbound, ""); err != nil {
 		t.Fatalf("normalize empty settings: %v", err)
 	}
 
@@ -178,6 +188,7 @@ func TestNormalizeAmneziaWGSettings_RejectsBad31Values(t *testing.T) {
 	}{
 		{"bad headerProtectionKey", `"headerProtectionKey":"short"`},
 		{"zero rekeyTimeout", `"rekeyTimeout":"0"`},
+		{"S1 past what an iOS client can receive", `"s1":1553`},
 		{"rekey overlapping reject", `"rekeyAfterTime":"100-200","rejectAfterTime":"150-300"`},
 		{"control chars in i2", `"i2":"<r 64>\nPostUp = evil"`},
 		{"line-wrapped headerProtectionKey", `"headerProtectionKey":"MCPfRGcDGotJ6Tcn\r\nIdDqsemj2cMIiGHnPUHM5ivXN18="`},
@@ -188,7 +199,7 @@ func TestNormalizeAmneziaWGSettings_RejectsBad31Values(t *testing.T) {
 			Port:     51820,
 			Settings: `{"server":{"privateKey":"x","publicKey":"y","subnetIp":"10.8.1.0","subnetCidr":24,` + c.snippet + `},"clients":[]}`,
 		}
-		if err := svc.normalizeAmneziaWGSettings(inbound); err == nil {
+		if err := svc.normalizeAmneziaWGSettings(inbound, ""); err == nil {
 			t.Errorf("%s must be rejected", c.name)
 		}
 	}
@@ -203,7 +214,7 @@ func TestNormalizeAmneziaWGSettings_CanonicalizesRangeValues(t *testing.T) {
 		Settings: `{"server":{"privateKey":"x","publicKey":"y","subnetIp":"10.8.1.0","subnetCidr":24,` +
 			`"rekeyAfterTime":"110 - 140","rejectAfterTime":"190-250","keepaliveTimeout":"   "},"clients":[]}`,
 	}
-	if err := svc.normalizeAmneziaWGSettings(inbound); err != nil {
+	if err := svc.normalizeAmneziaWGSettings(inbound, ""); err != nil {
 		t.Fatalf("normalize: %v", err)
 	}
 	var parsed amneziawg.InboundSettings
@@ -245,7 +256,7 @@ func TestNormalizeAmneziaWGSettings_RejectsInjectedClientAllowedIPs(t *testing.T
 			`"clients":[{"email":"a@x","enable":true,"publicKey":"pk",` +
 			`"allowedIPs":["10.8.1.2/32\n[Interface]\nPostUp = touch /tmp/pwned"]}]}`,
 	}
-	err := svc.normalizeAmneziaWGSettings(inbound)
+	err := svc.normalizeAmneziaWGSettings(inbound, "")
 	if err == nil {
 		t.Fatalf("an allowedIPs entry carrying a config-injection payload must be rejected; settings became:\n%s", inbound.Settings)
 	}
@@ -263,7 +274,7 @@ func TestNormalizeAmneziaWGSettings_CanonicalizesClientAllowedIPs(t *testing.T) 
 		Settings: `{"server":{"privateKey":"x","publicKey":"y","subnetIp":"10.8.1.0","subnetCidr":24},` +
 			`"clients":[{"email":"a@x","enable":true,"publicKey":"pk","allowedIPs":[" 10.8.1.2 "]}]}`,
 	}
-	if err := svc.normalizeAmneziaWGSettings(inbound); err != nil {
+	if err := svc.normalizeAmneziaWGSettings(inbound, ""); err != nil {
 		t.Fatalf("normalize: %v", err)
 	}
 	var parsed amneziawg.InboundSettings
@@ -276,6 +287,9 @@ func TestNormalizeAmneziaWGSettings_CanonicalizesClientAllowedIPs(t *testing.T) 
 }
 
 func TestGetAmneziaWGLogs_ClampsCountAndFiltersEvents(t *testing.T) {
+	// GetAmneziaWGLogs appends peer handshake activity, which reads the DB;
+	// own a throwaway one so -shuffle can't leave us the global nil DB.
+	setupConflictDB(t)
 	logger.InitLogger(logging.DEBUG)
 	logger.Info("amneziawg: started interface awg1 for inbound 1")
 	logger.Info("xray: unrelated line that must never show up here")
@@ -309,7 +323,7 @@ func TestGetAmneziaWGLogs_ClampsCountAndFiltersEvents(t *testing.T) {
 func TestCheckForwardedPortsConflict_RejectsSpecOverCap(t *testing.T) {
 	setupConflictDB(t)
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -326,7 +340,7 @@ func TestCheckForwardedPortsConflict_RejectsSpecOverCap(t *testing.T) {
 func TestCheckForwardedPortsConflict_AcceptsSpecExactlyAtCap(t *testing.T) {
 	setupConflictDB(t)
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -350,7 +364,7 @@ func TestCheckForwardedPortsConflict_CollidesWithAmneziawgnetSocksPort(t *testin
 	relayPort := amneziawgnet.SOCKSPortForInbound(awgInbound.Id)
 
 	svc := &InboundService{}
-	ctx, err := svc.loadPortConflictContext(database.GetDB())
+	ctx, err := svc.loadPortConflictContext(database.GetDB(), nil)
 	if err != nil {
 		t.Fatalf("loadPortConflictContext: %v", err)
 	}
@@ -375,12 +389,72 @@ func TestNormalizeAmneziaWGSettingsKeepsClearedDNS(t *testing.T) {
 		t.Fatalf("marshal settings: %v", err)
 	}
 	inbound := &model.Inbound{Protocol: model.AmneziaWG, Settings: string(bs)}
-	if err := (&InboundService{}).normalizeAmneziaWGSettings(inbound); err != nil {
+	if err := (&InboundService{}).normalizeAmneziaWGSettings(inbound, ""); err != nil {
 		t.Fatalf("normalizeAmneziaWGSettings: %v", err)
 	}
 	for _, key := range []string{`"primaryDns"`, `"secondaryDns"`} {
 		if !strings.Contains(inbound.Settings, key) {
 			t.Fatalf("cleared %s dropped from persisted settings:\n%s", key, inbound.Settings)
 		}
+	}
+}
+
+// An enabled peer with no address is skipped by InstanceFromInbound, and when it
+// is the only one the entire inbound never starts, with nothing logged anywhere.
+func TestNormalizeAmneziaWGSettings_RejectsEmptyClientAllowedIPs(t *testing.T) {
+	setupConflictDB(t)
+	svc := &InboundService{}
+	inbound := &model.Inbound{Protocol: model.AmneziaWG, Port: 51823, Settings: `{
+		"server": {"privateKey":"` + awgTestPrivateKey + `","publicKey":"` + awgTestPublicKey + `","subnetIp":"10.8.1.0","subnetCidr":24},
+		"clients": [{"email":"ghost","enable":true,"publicKey":"` + awgTestPublicKey + `","allowedIPs":[]}]
+	}`}
+	err := svc.normalizeAmneziaWGSettings(inbound, "")
+	if err == nil || !strings.Contains(err.Error(), "allowedIPs is required") {
+		t.Fatalf("err = %v, want an allowedIPs refusal naming the client", err)
+	}
+	if !strings.Contains(fmt.Sprint(err), "ghost") {
+		t.Fatalf("error must name the offending client, got %v", err)
+	}
+}
+
+// Omitting the server keys on update means "unchanged": minting a fresh pair
+// invalidates every client config already distributed, with no warning.
+func TestNormalizeAmneziaWGSettings_KeepsStoredServerKeysWhenOmitted(t *testing.T) {
+	setupConflictDB(t)
+	svc := &InboundService{}
+	stored := `{"server":{"privateKey":"` + awgTestPrivateKey + `","publicKey":"` + awgTestPublicKey + `","subnetIp":"10.8.1.0","subnetCidr":24}}`
+
+	inbound := &model.Inbound{Protocol: model.AmneziaWG, Port: 51824, Settings: `{"server":{"subnetIp":"10.8.1.0","subnetCidr":24,"randomTrailers":true}}`}
+	if err := svc.normalizeAmneziaWGSettings(inbound, stored); err != nil {
+		t.Fatalf("normalize: %v", err)
+	}
+	var parsed amneziawg.InboundSettings
+	if err := json.Unmarshal([]byte(inbound.Settings), &parsed); err != nil || parsed.Server == nil {
+		t.Fatalf("normalized settings must carry a server block (err=%v): %s", err, inbound.Settings)
+	}
+	if parsed.Server.PrivateKey != awgTestPrivateKey || parsed.Server.PublicKey != awgTestPublicKey {
+		t.Fatalf("server keypair was rotated by an unrelated edit: private=%q public=%q", parsed.Server.PrivateKey, parsed.Server.PublicKey)
+	}
+}
+
+// A payload carrying only the private half used to pass straight through, so
+// every rendered client config got "PublicKey = " with nothing after it.
+func TestNormalizeAmneziaWGSettings_DerivesServerPublicKeyFromPrivate(t *testing.T) {
+	setupConflictDB(t)
+	svc := &InboundService{}
+	inbound := &model.Inbound{Protocol: model.AmneziaWG, Port: 51825, Settings: `{"server":{"privateKey":"` + awgTestPrivateKey + `","subnetIp":"10.8.1.0","subnetCidr":24}}`}
+	if err := svc.normalizeAmneziaWGSettings(inbound, ""); err != nil {
+		t.Fatalf("normalize: %v", err)
+	}
+	var parsed amneziawg.InboundSettings
+	if err := json.Unmarshal([]byte(inbound.Settings), &parsed); err != nil || parsed.Server == nil {
+		t.Fatalf("normalized settings must carry a server block (err=%v): %s", err, inbound.Settings)
+	}
+	want, err := wgutil.PublicKeyFromPrivate(awgTestPrivateKey)
+	if err != nil {
+		t.Fatalf("derive expected key: %v", err)
+	}
+	if parsed.Server.PublicKey != want {
+		t.Fatalf("server publicKey = %q, want %q derived from the supplied private key", parsed.Server.PublicKey, want)
 	}
 }

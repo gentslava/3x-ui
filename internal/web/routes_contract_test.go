@@ -12,7 +12,7 @@ import (
 
 	"github.com/robfig/cron/v3"
 
-	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/global"
 )
 
@@ -23,16 +23,17 @@ and an entry for a removed route documents an endpoint that 404s. This test
 constructs the real router and diffs it against the registry both ways.
 
 Scope: everything under /panel/api/ plus the session-auth surface the
-registry also documents (/login, /logout, /csrf-token, /getTwoFactorEnable,
-/ws). SPA page routes are UI, not API, and stay out; registry paths that
-start with "/{" describe the standalone subscription server, which this
-engine does not serve.
+registry also documents (/login, /logout, /csrf-token, /sponsors,
+/getTwoFactorEnable, /ws). SPA page routes are UI, not API, and stay out;
+registry paths that start with "/{" describe the standalone subscription
+server, which this engine does not serve.
 */
 
 var contractExtraRoutes = map[string]bool{
 	"POST /login":              true,
 	"POST /logout":             true,
 	"GET /csrf-token":          true,
+	"GET /sponsors":            true,
 	"POST /getTwoFactorEnable": true,
 	"GET /ws":                  true,
 }
@@ -43,10 +44,7 @@ func inContractScope(method, path string) bool {
 
 func registeredContractRoutes(t *testing.T) map[string]bool {
 	t.Helper()
-	if err := database.InitDB(filepath.Join(t.TempDir(), "x-ui.db")); err != nil {
-		t.Fatalf("init db: %v", err)
-	}
-	t.Cleanup(func() { _ = database.CloseDB() })
+	dbtest.InitDB(t, filepath.Join(t.TempDir(), "x-ui.db"))
 
 	previous := global.GetWebServer()
 	s := NewServer()
@@ -78,7 +76,7 @@ func documentedContractRoutes(t *testing.T) map[string]bool {
 		t.Fatalf("read endpoints.ts: %v", err)
 	}
 	text := string(source)
-	methodRe := regexp.MustCompile(`method:\s*'(GET|POST|PUT|DELETE|PATCH|WS)'`)
+	methodRe := regexp.MustCompile(`method:\s*'(GET|POST|PUT|DELETE|PATCH|HEAD|WS)'`)
 	pathRe := regexp.MustCompile(`path:\s*'([^']+)'`)
 	methods := methodRe.FindAllStringSubmatchIndex(text, -1)
 	if declared := strings.Count(text, "method: '"); len(methods) != declared {

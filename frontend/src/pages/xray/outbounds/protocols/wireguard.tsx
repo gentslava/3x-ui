@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Button, Form, Input, InputNumber, Select, Space, Switch } from 'antd';
+import { Button, Form, Input, InputNumber, Space, Switch } from 'antd';
 import { DeleteOutlined, MinusOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
@@ -7,7 +7,6 @@ import { Wireguard } from '@/utils';
 import { activateOnKey } from '@/utils/a11y';
 import { InputAddon } from '@/components/ui';
 import { FormField } from '@/components/form/rhf';
-import { WireguardDomainStrategy } from '@/schemas/primitives';
 
 function AllowedIPsList({ peerIndex }: { peerIndex: number }) {
   const { t } = useTranslation();
@@ -75,17 +74,6 @@ export default function WireguardFields() {
       <FormField label={t('pages.inbounds.publicKey')} name={['settings', 'pubKey']}>
         <Input disabled />
       </FormField>
-      <FormField
-        label={t('pages.xray.wireguard.domainStrategy')}
-        name={['settings', 'domainStrategy']}
-      >
-        <Select
-          options={[
-            { value: '', label: `(${t('none')})` },
-            ...WireguardDomainStrategy.map((s) => ({ value: s, label: s })),
-          ]}
-        />
-      </FormField>
       <FormField label="MTU" name={['settings', 'mtu']}>
         <InputNumber min={0} />
       </FormField>
@@ -98,6 +86,9 @@ export default function WireguardFields() {
       </FormField>
       <FormField label={t('pages.xray.outboundForm.reserved')} name={['settings', 'reserved']}>
         <Input placeholder="comma-separated bytes, e.g. 1,2,3" />
+      </FormField>
+      <FormField label={t('pages.xray.outboundForm.remoteDNS')} name={['settings', 'remoteDNS']}>
+        <Input placeholder="comma-separated, e.g. 1.1.1.1,2606:4700:4700::1111" />
       </FormField>
       <Form.Item label={t('pages.inbounds.form.peers')}>
         <Button

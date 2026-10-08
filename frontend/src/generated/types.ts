@@ -3,16 +3,28 @@ export type GeoKind = string;
 export type OnlineAPISupport = number;
 export type ProcessState = string;
 export type Protocol = string;
-export type SubLinkProvider = unknown;
+export type addrFamily = number;
 export type staticEgressResolver = string;
 export type trafficLocalApplyAction = number;
 export type transportBits = number;
 
 export interface AllSetting {
   datepicker: string;
+  discordAdminIds: string;
+  discordBotBackup: boolean;
+  discordBotEnable: boolean;
+  discordBotToken: string;
+  discordChannelId: string;
+  discordCpu: number;
+  discordEnabledEvents: string;
+  discordLang: string;
+  discordMemory: number;
+  discordRunTime: string;
   expireDiff: number;
+  externalSubUserAgent: string;
   externalTrafficInformEnable: boolean;
   externalTrafficInformURI: string;
+  happLinkEnable: boolean;
   ipLimitAllowlist: string;
   ldapAutoCreate: boolean;
   ldapAutoDelete: boolean;
@@ -38,6 +50,7 @@ export interface AllSetting {
   outboundDownThreshold: number;
   pageSize: number;
   panelOutbound: string;
+  realityScanCandidates: string;
   remarkTemplate: string;
   restartXrayOnClientDisable: boolean;
   sessionMaxAge: number;
@@ -54,6 +67,7 @@ export interface AllSetting {
   smtpTo: string;
   smtpUsername: string;
   subAnnounce: string;
+  subCalendarExpireInclusive: boolean;
   subCertFile: string;
   subClashAutoDetect: boolean;
   subClashEnable: boolean;
@@ -66,16 +80,72 @@ export interface AllSetting {
   subEnable: boolean;
   subEnableRouting: boolean;
   subEncrypt: boolean;
+  subExpiredTemplate: string;
+  subHappAlwaysHwid: boolean;
+  subHappAutoConnect: boolean;
+  subHappAutoConnectType: string;
+  subHappAutoDetect: boolean;
+  subHappColorProfile: string;
+  subHappExcludeApns: boolean;
+  subHappExcludeRoutes: string;
+  subHappFallbackUrl: string;
+  subHappLocalProxyAuth: string;
+  subHappNewUrl: string;
+  subHappNoLimit: boolean;
+  subHappNotificationExpire: boolean;
+  subHappPerAppList: string;
+  subHappPerAppMode: string;
+  subHappPingType: string;
+  subHappProviderId: string;
+  subHappSubExpire: boolean;
+  subHappSubExpireButtonLink: string;
+  subHappSubInfoButtonLink: string;
+  subHappSubInfoButtonText: string;
+  subHappSubInfoColor: string;
+  subHappSubInfoText: string;
+  subHappTunMode: string;
+  subHappTunType: string;
   subHideSettings: boolean;
+  subIncyAnnounceUrl: string;
+  subIncyAppAutoDetect: boolean;
+  subIncyBannerBgColor: string;
+  subIncyBannerButtonColor: string;
+  subIncyBannerButtonText: string;
+  subIncyBannerButtonUrl: string;
+  subIncyBannerText: string;
   subIncyEnableRouting: boolean;
+  subIncyFragmentInterval: string;
+  subIncyFragmentLength: string;
+  subIncyFragmentPackets: string;
+  subIncyFragmentationEnable: string;
+  subIncyHideCheck: string;
+  subIncyHideUrl: string;
+  subIncyNoLimitEnabled: string;
+  subIncyNoisesDelay: string;
+  subIncyNoisesEnable: string;
+  subIncyNoisesPacket: string;
+  subIncyNoisesType: string;
+  subIncyPerAppEnable: string;
+  subIncyPerAppList: string;
+  subIncyPerAppMode: string;
+  subIncyPremiumUrl: string;
+  subIncyProfileDescription: string;
+  subIncyResolveDnsDomain: string;
+  subIncyResolveDnsIp: string;
+  subIncyResolveEnable: string;
   subIncyRoutingRules: string;
+  subIncySortOrder: string;
+  subIncySupportEmail: string;
+  subInfoNodeEnable: boolean;
   subJsonAlwaysArray: boolean;
   subJsonAutoDetect: boolean;
+  subJsonDns: string;
   subJsonEnable: boolean;
   subJsonFinalMask: string;
   subJsonMux: string;
   subJsonObservatory: string;
   subJsonPath: string;
+  subJsonRoutingRules: string;
   subJsonRules: string;
   subJsonURI: string;
   subJsonUserAgentRegex: string;
@@ -83,12 +153,14 @@ export interface AllSetting {
   subListen: string;
   subPath: string;
   subPort: number;
+  subProfileMode: string;
   subProfileUrl: string;
   subRoutingRules: string;
   subShowIdentityOnAllLinks: boolean;
   subSupportUrl: string;
   subThemeDir: string;
   subTitle: string;
+  subTrafficDepletedTemplate: string;
   subURI: string;
   subUpdates: number;
   tgBotAPIServer: string;
@@ -118,10 +190,23 @@ export interface AllSetting {
 
 export interface AllSettingView {
   datepicker: string;
+  discordAdminIds: string;
+  discordBotBackup: boolean;
+  discordBotEnable: boolean;
+  discordBotToken: string;
+  discordChannelId: string;
+  discordCpu: number;
+  discordEnabledEvents: string;
+  discordLang: string;
+  discordMemory: number;
+  discordRunTime: string;
   expireDiff: number;
+  externalSubUserAgent: string;
   externalTrafficInformEnable: boolean;
   externalTrafficInformURI: string;
+  happLinkEnable: boolean;
   hasApiToken: boolean;
+  hasDiscordBotToken: boolean;
   hasLdapPassword: boolean;
   hasNordSecret: boolean;
   hasSmtpPassword: boolean;
@@ -153,6 +238,7 @@ export interface AllSettingView {
   outboundDownThreshold: number;
   pageSize: number;
   panelOutbound: string;
+  realityScanCandidates: string;
   remarkTemplate: string;
   restartXrayOnClientDisable: boolean;
   sessionMaxAge: number;
@@ -169,6 +255,7 @@ export interface AllSettingView {
   smtpTo: string;
   smtpUsername: string;
   subAnnounce: string;
+  subCalendarExpireInclusive: boolean;
   subCertFile: string;
   subClashAutoDetect: boolean;
   subClashEnable: boolean;
@@ -181,16 +268,72 @@ export interface AllSettingView {
   subEnable: boolean;
   subEnableRouting: boolean;
   subEncrypt: boolean;
+  subExpiredTemplate: string;
+  subHappAlwaysHwid: boolean;
+  subHappAutoConnect: boolean;
+  subHappAutoConnectType: string;
+  subHappAutoDetect: boolean;
+  subHappColorProfile: string;
+  subHappExcludeApns: boolean;
+  subHappExcludeRoutes: string;
+  subHappFallbackUrl: string;
+  subHappLocalProxyAuth: string;
+  subHappNewUrl: string;
+  subHappNoLimit: boolean;
+  subHappNotificationExpire: boolean;
+  subHappPerAppList: string;
+  subHappPerAppMode: string;
+  subHappPingType: string;
+  subHappProviderId: string;
+  subHappSubExpire: boolean;
+  subHappSubExpireButtonLink: string;
+  subHappSubInfoButtonLink: string;
+  subHappSubInfoButtonText: string;
+  subHappSubInfoColor: string;
+  subHappSubInfoText: string;
+  subHappTunMode: string;
+  subHappTunType: string;
   subHideSettings: boolean;
+  subIncyAnnounceUrl: string;
+  subIncyAppAutoDetect: boolean;
+  subIncyBannerBgColor: string;
+  subIncyBannerButtonColor: string;
+  subIncyBannerButtonText: string;
+  subIncyBannerButtonUrl: string;
+  subIncyBannerText: string;
   subIncyEnableRouting: boolean;
+  subIncyFragmentInterval: string;
+  subIncyFragmentLength: string;
+  subIncyFragmentPackets: string;
+  subIncyFragmentationEnable: string;
+  subIncyHideCheck: string;
+  subIncyHideUrl: string;
+  subIncyNoLimitEnabled: string;
+  subIncyNoisesDelay: string;
+  subIncyNoisesEnable: string;
+  subIncyNoisesPacket: string;
+  subIncyNoisesType: string;
+  subIncyPerAppEnable: string;
+  subIncyPerAppList: string;
+  subIncyPerAppMode: string;
+  subIncyPremiumUrl: string;
+  subIncyProfileDescription: string;
+  subIncyResolveDnsDomain: string;
+  subIncyResolveDnsIp: string;
+  subIncyResolveEnable: string;
   subIncyRoutingRules: string;
+  subIncySortOrder: string;
+  subIncySupportEmail: string;
+  subInfoNodeEnable: boolean;
   subJsonAlwaysArray: boolean;
   subJsonAutoDetect: boolean;
+  subJsonDns: string;
   subJsonEnable: boolean;
   subJsonFinalMask: string;
   subJsonMux: string;
   subJsonObservatory: string;
   subJsonPath: string;
+  subJsonRoutingRules: string;
   subJsonRules: string;
   subJsonURI: string;
   subJsonUserAgentRegex: string;
@@ -198,12 +341,14 @@ export interface AllSettingView {
   subListen: string;
   subPath: string;
   subPort: number;
+  subProfileMode: string;
   subProfileUrl: string;
   subRoutingRules: string;
   subShowIdentityOnAllLinks: boolean;
   subSupportUrl: string;
   subThemeDir: string;
   subTitle: string;
+  subTrafficDepletedTemplate: string;
   subURI: string;
   subUpdates: number;
   tgBotAPIServer: string;
@@ -271,7 +416,7 @@ export interface Client {
   forwardedPorts?: string;
   group?: string;
   id?: string;
-  keepAlive?: number;
+  keepAlive?: number | null;
   limitIp: number;
   password?: string;
   preSharedKey?: string;
@@ -280,6 +425,7 @@ export interface Client {
   reset: number;
   resetDay: number;
   resetMax: number;
+  resetWeekday: number;
   reverse?: ClientReverse | null;
   secret?: string;
   security: string;
@@ -296,6 +442,16 @@ export interface ClientInbound {
   createdAt: number;
   flowOverride: string;
   inboundId: number;
+}
+
+export interface ClientPageResponse {
+  filtered: number;
+  groups: string[];
+  items: ClientSlim[];
+  page: number;
+  pageSize: number;
+  summary: ClientsSummary;
+  total: number;
 }
 
 export interface ClientRecord {
@@ -321,6 +477,7 @@ export interface ClientRecord {
   reset: number;
   resetDay: number;
   resetMax: number;
+  resetWeekday: number;
   reverse: unknown;
   secret: string;
   security: string;
@@ -333,8 +490,49 @@ export interface ClientRecord {
   uuid: string;
 }
 
+export interface ClientRenewalPreview {
+  canRenew: boolean;
+  delayedStart: boolean;
+  nextExpiry: string;
+  renewAt: string;
+  renewals: number;
+  suggestedExpiry: string;
+  suggestedExpiryTime: number;
+  timeZone: string;
+  validThrough: string;
+}
+
+export interface ClientRenewalPreviewRequest {
+  expiryTime: number;
+  reset: number;
+  resetCount: number;
+  resetDay: number;
+  resetMax: number;
+  resetWeekday: number;
+}
+
 export interface ClientReverse {
   tag: string;
+}
+
+export interface ClientSlim {
+  comment?: string;
+  createdAt: number;
+  email: string;
+  enable: boolean;
+  expiryTime: number;
+  group?: string;
+  inboundIds: number[];
+  limitHwid: number;
+  limitIp: number;
+  reset: number;
+  resetDay: number;
+  resetMax: number;
+  resetWeekday: number;
+  subId: string;
+  totalGB: number;
+  traffic?: ClientTraffic | null;
+  updatedAt: number;
 }
 
 export interface ClientTraffic {
@@ -350,10 +548,24 @@ export interface ClientTraffic {
   resetCount: number;
   resetDay: number;
   resetMax: number;
+  resetWeekday: number;
   subId: string;
   total: number;
   up: number;
   uuid: string;
+}
+
+export interface ClientsSummary {
+  active: number;
+  deactive: string[];
+  deactiveCount: number;
+  depleted: string[];
+  depletedCount: number;
+  expiring: string[];
+  expiringCount: number;
+  online: string[];
+  onlineCount: number;
+  total: number;
 }
 
 export interface FallbackParentInfo {
@@ -398,6 +610,10 @@ export interface GeodataTokenIssue {
   token: string;
 }
 
+export interface HappLinkResult {
+  encryptedLink: string;
+}
+
 export interface HistoryOfSeeders {
   id: number;
   seederName: string;
@@ -407,6 +623,7 @@ export interface Host {
   address: string;
   allowInsecure: boolean;
   alpn: string[];
+  cipherSuites: string;
   createdAt: number;
   echConfigList: string;
   excludeFromSubTypes: string[];
@@ -443,6 +660,7 @@ export interface Host {
 export interface HostGroup {
   allowInsecure: boolean;
   alpn: string[];
+  cipherSuites: string;
   echConfigList: string;
   excludeFromSubTypes: string[];
   finalMask: string;
@@ -474,11 +692,20 @@ export interface HostGroup {
   vlessRoute: string;
 }
 
+export interface HwidSlotStatus {
+  active: boolean;
+  full: boolean;
+  limit: number;
+  registered: number;
+  remaining: number;
+}
+
 export interface Inbound {
   clientStats: ClientTraffic[];
   disableFlow: boolean;
   down: number;
   enable: boolean;
+  excludeFromSub: boolean;
   expiryTime: number;
   fallbackParent?: FallbackParentInfo | null;
   id: number;
@@ -526,25 +753,60 @@ export interface InboundOption {
   id: number;
   listen?: string;
   mtprotoDomain?: string;
+  network?: string;
   nodeAddress?: string;
   nodeId?: number | null;
   port: number;
   protocol: string;
   remark: string;
+  security?: string;
   shareAddr?: string;
   shareAddrStrategy?: string;
   ssMethod: string;
   tag: string;
   tlsFlowCapable: boolean;
+  tuicServer?: TuicServerSettings | null;
   wgDns?: string;
   wgMtu?: number;
   wgPublicKey?: string;
+}
+
+export interface InboundTrafficSummary {
+  down: number;
+  enable: boolean;
+  id: number;
+  total: number;
+  up: number;
+}
+
+export interface LogEntry {
+  DateTime: string;
+  Email: string;
+  Event: number;
+  FromAddress: string;
+  Inbound: string;
+  Outbound: string;
+  ToAddress: string;
+}
+
+export interface MLDSA65Response {
+  seed: string;
+  verify: string;
+}
+
+export interface MLKEM768Response {
+  client: string;
+  seed: string;
 }
 
 export interface Msg {
   msg: string;
   obj: unknown;
   success: boolean;
+}
+
+export interface NewUUIDResponse {
+  uuid: string;
 }
 
 export interface Node {
@@ -696,6 +958,7 @@ export interface ProbeResultUI {
 
 export interface RealityScanResult {
   alpn: string;
+  certChainBytes: number;
   certChainValid: boolean;
   certIssuer: string;
   certSubject: string;
@@ -763,15 +1026,62 @@ export interface Setting {
   value: string;
 }
 
+export interface Sponsor {
+  enable?: boolean | null;
+  from?: string | null;
+  id: string;
+  link: string;
+  logo?: string;
+  name: string;
+  slots: string[];
+  text: Record<string, string>;
+  title: Record<string, string>;
+  until: string;
+}
+
+export interface SponsorList {
+  contact?: string;
+  sponsors: Sponsor[];
+}
+
 export interface SubBalancer {
   createdAt: number;
   enabled: boolean;
   id: number;
   inboundIds: number[];
+  memberWeights?: Record<number, number>;
   remark: string;
   sortOrder: number;
   strategy: string;
   updatedAt: number;
+}
+
+export interface Traffic {
+  Down: number;
+  IsInbound: boolean;
+  IsOutbound: boolean;
+  Tag: string;
+  Up: number;
+}
+
+export interface TuicClientSettings {
+  email: string;
+  password: string;
+  uuid: string;
+}
+
+export interface TuicServerSettings {
+  alpn: string[];
+  authentication_timeout: number;
+  certificate: string;
+  congestion_control: string;
+  log_level: string;
+  max_idle_time: number;
+  max_udp_relay_packet_size: number;
+  private_key: string;
+  sni?: string;
+  udp_relay_mode: string;
+  zero_rtt_handshake: boolean;
 }
 
 export interface User {

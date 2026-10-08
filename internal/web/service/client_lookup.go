@@ -104,6 +104,17 @@ func (s *ClientService) GetInboundIdsForEmail(tx *gorm.DB, email string) ([]int,
 	return ids, nil
 }
 
+// sub_id carries a plain index, not a unique one: one subscription can cover
+// several clients, so callers acting on a subId must handle all of them.
+func (s *ClientService) GetRecordsBySubID(subId string) ([]*model.ClientRecord, error) {
+	if subId == "" {
+		return nil, errors.New("sub_id must not be empty")
+	}
+	var rows []*model.ClientRecord
+	err := database.GetDB().Where("sub_id = ?", subId).Order("id ASC").Find(&rows).Error
+	return rows, err
+}
+
 func (s *ClientService) GetRecordsByTgID(tgId int64) ([]*model.ClientRecord, error) {
 	if tgId <= 0 {
 		return nil, errors.New("tg_id must be a positive integer")
@@ -269,4 +280,26 @@ func (s *ClientService) findInboundIdsByClientEmail(email string) ([]int, error)
 		}
 	}
 	return out, nil
+}
+
+// clientRecordsByEmail batch-loads client rows for emails, keyed by email.
+// Callers pass an already-deduplicated list; absent addresses are simply
+// missing from the map.
+func clientRecordsByEmail(tx *gorm.DB, emails []string) (map[string]*model.ClientRecord, error) {
+	if tx == nil {
+		tx = database.GetDB()
+	}
+	var records []model.ClientRecord
+	for _, batch := range chunkStrings(emails, sqlInChunk) {
+		var rows []model.ClientRecord
+		if err := tx.Where("email IN ?", batch).Find(&rows).Error; err != nil {
+			return nil, err
+		}
+		records = append(records, rows...)
+	}
+	byEmail := make(map[string]*model.ClientRecord, len(records))
+	for i := range records {
+		byEmail[records[i].Email] = &records[i]
+	}
+	return byEmail, nil
 }

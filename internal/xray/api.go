@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"net/netip"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -182,8 +183,33 @@ func ValidateOutboundConfig(outbound []byte) error {
 	if err := json.Unmarshal(outbound, detour); err != nil {
 		return err
 	}
-	_, err := detour.Build()
-	return err
+	built, err := detour.Build()
+	if err != nil {
+		return err
+	}
+	return validateWireguardRemoteDNS(built.ProxySettings)
+}
+
+// validateWireguardRemoteDNS refuses what conf.Build() lets through but the core feeds to
+// netip.MustParseAddr at startup: a non-IP remoteDNS entry, like "local" before 26.9.30.
+func validateWireguardRemoteDNS(settings *serial.TypedMessage) error {
+	if settings == nil {
+		return nil
+	}
+	instance, err := settings.GetInstance()
+	if err != nil {
+		return nil
+	}
+	device, ok := instance.(*wireguard.DeviceConfig)
+	if !ok || !device.IsClient {
+		return nil
+	}
+	for _, server := range device.DNS {
+		if _, err := netip.ParseAddr(server); err != nil {
+			return common.NewErrorf("wireguard remoteDNS entry %q is not an IP address", server)
+		}
+	}
+	return nil
 }
 
 // AddOutbound adds a new outbound configuration to the Xray core via gRPC.
@@ -496,6 +522,25 @@ func shadowsocksCipherName(user map[string]any) (string, error) {
 	return getOptionalUserString(user, "method")
 }
 
+// reverseTag reads a vless reverse proxy tag from either shape a caller can
+// carry: the settings JSON object, or a typed client value marshalling alike.
+func reverseTag(value any) string {
+	if value == nil {
+		return ""
+	}
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return ""
+	}
+	var parsed struct {
+		Tag string `json:"tag"`
+	}
+	if json.Unmarshal(raw, &parsed) != nil {
+		return ""
+	}
+	return parsed.Tag
+}
+
 // shadowsocksCipherType mirrors xray-core's infra/conf cipherFromString,
 // aliases and case-insensitivity included, so the account the panel builds for
 // a live user matches the one the core built for that inbound from its config.
@@ -555,6 +600,11 @@ func buildUserAccount(protocolName string, user map[string]any) (*serial.TypedMe
 		vlessAccount := &vless.Account{
 			Id:   userID,
 			Flow: userFlow,
+		}
+		// RemoveUser also drops the account's reverse outbound handler, and
+		// GetReverse only rebuilds it from the tag a re-added account carries.
+		if tag := reverseTag(user["reverse"]); tag != "" {
+			vlessAccount.Reverse = &vless.Reverse{Tag: tag}
 		}
 		if testseedVal, ok := user["testseed"]; ok {
 			if testseedArr, ok := testseedVal.([]any); ok && len(testseedArr) >= 4 {

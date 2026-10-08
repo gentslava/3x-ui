@@ -9,6 +9,8 @@ import {
   createDefaultShadowsocksInboundSettings,
   createDefaultTrojanClient,
   createDefaultTrojanInboundSettings,
+  createDefaultTuicClient,
+  createDefaultTuicInboundSettings,
   createDefaultTunnelInboundSettings,
   createDefaultVlessClient,
   createDefaultVlessInboundSettings,
@@ -31,6 +33,7 @@ import {
   TrojanClientSchema,
   TrojanInboundSettingsSchema,
 } from '@/schemas/protocols/inbound/trojan';
+import { TuicClientSchema, TuicInboundSettingsSchema } from '@/schemas/protocols/inbound/tuic';
 import { TunnelInboundSettingsSchema } from '@/schemas/protocols/inbound/tunnel';
 import { VlessClientSchema, VlessInboundSettingsSchema } from '@/schemas/protocols/inbound/vless';
 import { VmessClientSchema, VmessInboundSettingsSchema } from '@/schemas/protocols/inbound/vmess';
@@ -86,6 +89,17 @@ describe('createDefaultHysteriaClient', () => {
     const c = createDefaultHysteriaClient({ ...seed, auth: 'fixed-hyst-auth' });
     expect(c).toMatchSnapshot();
     expect(HysteriaClientSchema.parse(c)).toEqual(c);
+  });
+});
+
+describe('createDefaultTuicClient', () => {
+  it('produces a Zod-valid client', () => {
+    const c = createDefaultTuicClient({
+      ...seed,
+      uuid: '11111111-2222-3333-4444-555555555555',
+      password: 'fixed-tuic-pw',
+    });
+    expect(TuicClientSchema.parse(c)).toEqual(c);
   });
 });
 
@@ -156,6 +170,53 @@ describe('createDefault*InboundSettings factories', () => {
     expect(WireguardInboundSettingsSchema.parse(s)).toEqual(s);
     expect(s.peers).toEqual([]);
     expect(s.clients).toEqual([]);
+  });
+
+  it('tuic', () => {
+    const s = createDefaultTuicInboundSettings();
+    expect(TuicInboundSettingsSchema.parse(s)).toEqual(s);
+  });
+});
+
+describe('TuicInboundSettingsSchema', () => {
+  it('canonicalizes congestion-controller aliases and casing', () => {
+    expect(
+      TuicInboundSettingsSchema.parse({ server: { congestion_control: 'RENO' } }).server
+        ?.congestion_control,
+    ).toBe('new_reno');
+    expect(
+      TuicInboundSettingsSchema.parse({ server: { congestion_control: ' CuBiC ' } }).server
+        ?.congestion_control,
+    ).toBe('cubic');
+    expect(
+      TuicInboundSettingsSchema.parse({ server: { congestion_control: '' } }).server
+        ?.congestion_control,
+    ).toBe('bbr');
+    expect(
+      TuicInboundSettingsSchema.parse({ server: { congestion_control: '  ' } }).server
+        ?.congestion_control,
+    ).toBe('bbr');
+    expect(
+      TuicInboundSettingsSchema.parse({ congestion_control: ' CuBiC ' }).congestion_control,
+    ).toBe('cubic');
+    expect(
+      TuicInboundSettingsSchema.parse({ congestion_control: 'invalid' }).congestion_control,
+    ).toBe('new_reno');
+  });
+
+  it('clamps legacy packet-size values to the SOCKS-safe UDP payload maximum', () => {
+    expect(
+      TuicInboundSettingsSchema.parse({ server: { max_udp_relay_packet_size: 65507 } }).server
+        ?.max_udp_relay_packet_size,
+    ).toBe(65245);
+    expect(
+      TuicInboundSettingsSchema.parse({ max_udp_relay_packet_size: 65500 })
+        .max_udp_relay_packet_size,
+    ).toBe(65245);
+    expect(() =>
+      TuicInboundSettingsSchema.parse({ server: { max_udp_relay_packet_size: 65508 } }),
+    ).toThrow();
+    expect(() => TuicInboundSettingsSchema.parse({ max_udp_relay_packet_size: 65508 })).toThrow();
   });
 });
 

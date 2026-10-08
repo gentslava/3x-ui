@@ -74,6 +74,7 @@ describe('buildShareLinks', () => {
     expect(parsed.port).toBe(443);
     expect(parsed.credential).toBe('11111111-2222-3333-4444-555555555555');
     expect(parsed.params.security).toBe('reality');
+    expect(parsed.params['support-x25519mlkem768']).toBe('true');
     expect(parsed.name).toBe('HK-01');
   });
 });
@@ -118,6 +119,28 @@ describe('buildJsonSubscription', () => {
     // sockopt is stripped from JSON-sub streamSettings
     expect(JSON.stringify(proxy.streamSettings)).not.toContain('sockopt');
     expect(cfg.remarks).toBe('HK-01');
+  });
+
+  it('keeps the Mihomo-only ML-KEM hint out of the Xray realitySettings', () => {
+    const cfg = JSON.parse(buildJsonSubscription([vlessClient]));
+    expect(cfg.outbounds[0].streamSettings.realitySettings.publicKey).toBe(vlessClient.publicKey);
+    expect(cfg.outbounds[0].streamSettings.realitySettings).not.toHaveProperty(
+      'supportX25519Mlkem768',
+    );
+  });
+
+  it('uses the iOS-compatible SOCKS inbound while preserving the mixed tag and HTTP inbound', () => {
+    const cfg = JSON.parse(buildJsonSubscription([vlessClient]));
+    const socks = cfg.inbounds.find((inbound: { port: number }) => inbound.port === 10808);
+    const http = cfg.inbounds.find((inbound: { port: number }) => inbound.port === 10809);
+
+    expect(socks).toMatchObject({
+      listen: '127.0.0.1',
+      protocol: 'socks',
+      tag: 'mixed',
+      settings: { udp: true },
+    });
+    expect(http).toMatchObject({ listen: '127.0.0.1', protocol: 'http' });
   });
 
   it('trojan uses servers[] with a password and no method', () => {

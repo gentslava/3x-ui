@@ -3,6 +3,7 @@ package sub
 import (
 	"encoding/base64"
 	"encoding/json"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -743,16 +744,6 @@ func TestApplyExternalProxy_ECHPropagates(t *testing.T) {
 		}
 	})
 
-	t.Run("json stream settings", func(t *testing.T) {
-		stream := map[string]any{"security": "tls", "tlsSettings": map[string]any{}}
-		ep := map[string]any{"dest": "proxy.example.com", "echConfigList": ech}
-		applyExternalProxyTLSToStream(ep, stream, "tls")
-		settings, _ := stream["tlsSettings"].(map[string]any)["settings"].(map[string]any)
-		if settings["echConfigList"] != ech {
-			t.Fatalf("echConfigList = %v, want %q", settings["echConfigList"], ech)
-		}
-	})
-
 	t.Run("non-tls security drops ech", func(t *testing.T) {
 		params := map[string]string{}
 		ep := map[string]any{"echConfigList": ech}
@@ -1055,6 +1046,102 @@ func TestMarshalFinalMask_WithContent(t *testing.T) {
 	}
 }
 
+func TestMarshalFinalMaskAddsLegacyFragmentRanges(t *testing.T) {
+	lengths := []any{"5-10", "10-15", "15-20", "20-25", "25-30"}
+	delays := []any{"10-20", "5-20", "5-25", "15-25", "10-30"}
+	screenshotSettings := map[string]any{
+		"packets":  "tlshello",
+		"lengths":  lengths,
+		"delays":   delays,
+		"maxSplit": "10-15",
+	}
+	explicitSettings := map[string]any{
+		"length":  "1-2",
+		"lengths": []any{"8-9"},
+		"delay":   "3-4",
+		"delays":  []any{"6-7"},
+	}
+	emptySettings := map[string]any{
+		"lengths": []any{},
+		"delays":  []any{},
+	}
+	legacyOnlySettings := map[string]any{"length": "40-50", "delay": "10-20"}
+	otherSettings := map[string]any{"lengths": []any{"30-40"}}
+	fm := map[string]any{
+		"tcp": []any{
+			map[string]any{"type": "fragment", "settings": screenshotSettings},
+			map[string]any{"type": "fragment", "settings": explicitSettings},
+			map[string]any{"type": "fragment", "settings": emptySettings},
+			map[string]any{"type": "fragment", "settings": legacyOnlySettings},
+			map[string]any{"type": "sudoku", "settings": otherSettings},
+		},
+	}
+	original, err := json.Marshal(fm)
+	if err != nil {
+		t.Fatalf("marshal input finalmask: %v", err)
+	}
+
+	encoded, ok := marshalFinalMask(fm)
+	if !ok {
+		t.Fatal("expected finalmask with fragment masks to be marshaled")
+	}
+	var got map[string]any
+	if err := json.Unmarshal([]byte(encoded), &got); err != nil {
+		t.Fatalf("unmarshal marshaled finalmask: %v", err)
+	}
+	masks, _ := got["tcp"].([]any)
+	if len(masks) != 5 {
+		t.Fatalf("tcp mask count = %d, want 5", len(masks))
+	}
+	settingsAt := func(index int) map[string]any {
+		t.Helper()
+		mask, _ := masks[index].(map[string]any)
+		settings, _ := mask["settings"].(map[string]any)
+		if settings == nil {
+			t.Fatalf("tcp[%d] settings missing: %#v", index, mask)
+		}
+		return settings
+	}
+
+	gotScreenshot := settingsAt(0)
+	if gotScreenshot["length"] != "25-30" || gotScreenshot["delay"] != "10-30" {
+		t.Fatalf("legacy ranges = (%v, %v), want last array entries", gotScreenshot["length"], gotScreenshot["delay"])
+	}
+	if !reflect.DeepEqual(gotScreenshot["lengths"], lengths) || !reflect.DeepEqual(gotScreenshot["delays"], delays) {
+		t.Fatalf("per-segment ranges changed: lengths=%#v delays=%#v", gotScreenshot["lengths"], gotScreenshot["delays"])
+	}
+	if gotScreenshot["packets"] != "tlshello" || gotScreenshot["maxSplit"] != "10-15" {
+		t.Fatalf("other fragment settings changed: %#v", gotScreenshot)
+	}
+
+	gotExplicit := settingsAt(1)
+	if gotExplicit["length"] != "1-2" || gotExplicit["delay"] != "3-4" {
+		t.Fatalf("explicit legacy ranges were overwritten: %#v", gotExplicit)
+	}
+	gotEmpty := settingsAt(2)
+	if _, exists := gotEmpty["length"]; exists {
+		t.Fatalf("empty lengths must not emit a fallback: %#v", gotEmpty)
+	}
+	if _, exists := gotEmpty["delay"]; exists {
+		t.Fatalf("empty delays must not emit a fallback: %#v", gotEmpty)
+	}
+	gotLegacyOnly := settingsAt(3)
+	if gotLegacyOnly["length"] != "40-50" || gotLegacyOnly["delay"] != "10-20" {
+		t.Fatalf("legacy-only ranges changed: %#v", gotLegacyOnly)
+	}
+	if _, exists := settingsAt(4)["length"]; exists {
+		t.Fatalf("non-fragment mask received a fallback: %#v", settingsAt(4))
+	}
+
+	after, err := json.Marshal(fm)
+	if err != nil {
+		t.Fatalf("marshal input finalmask after export: %v", err)
+	}
+	if string(after) != string(original) {
+		t.Fatalf("marshalFinalMask mutated its input:\nbefore: %s\nafter:  %s", original, after)
+	}
+}
+
 func TestMarshalFinalMask_UnknownTypeIsDropped(t *testing.T) {
 	fm := map[string]any{
 		"tcp": []any{
@@ -1078,6 +1165,19 @@ func TestMarshalFinalMask_KeepsXmcTcpMask(t *testing.T) {
 	}
 	if !strings.Contains(out, "xmc") {
 		t.Fatalf("marshaled finalmask dropped the xmc mask: %s", out)
+	}
+}
+
+func TestMarshalFinalMask_KeepsUdpHopMask(t *testing.T) {
+	fm := map[string]any{
+		"udp": []any{udpHopMask("20000-50000")},
+	}
+	out, ok := marshalFinalMask(fm)
+	if !ok {
+		t.Fatal("expected ok=true for a udphop udp mask")
+	}
+	if !strings.Contains(out, "udphop") || !strings.Contains(out, "20000-50000") {
+		t.Fatalf("marshaled finalmask dropped the udphop mask: %s", out)
 	}
 }
 
@@ -1127,6 +1227,13 @@ func TestHysteriaPinHex(t *testing.T) {
 	}
 }
 
+func udpHopMask(ports string) map[string]any {
+	return map[string]any{
+		"type":     "udphop",
+		"settings": map[string]any{"mode": "intervalremote", "interval": "5-10", "remotePorts": ports},
+	}
+}
+
 func TestHysteriaHopPorts(t *testing.T) {
 	withHop := func(ports any) map[string]any {
 		return map[string]any{
@@ -1137,6 +1244,11 @@ func TestHysteriaHopPorts(t *testing.T) {
 			},
 		}
 	}
+	withHopMask := func(ports string) map[string]any {
+		return map[string]any{
+			"finalmask": map[string]any{"udp": []any{udpHopMask(ports)}},
+		}
+	}
 
 	cases := []struct {
 		name   string
@@ -1144,6 +1256,14 @@ func TestHysteriaHopPorts(t *testing.T) {
 		want   string
 	}{
 		{"range", withHop("20000-50000"), "20000-50000"},
+		{"udphop mask", withHopMask("20000-50000"), "20000-50000"},
+		{"udphop mask wins over legacy key", map[string]any{
+			"finalmask": map[string]any{
+				"udp":        []any{udpHopMask("30000-40000")},
+				"quicParams": map[string]any{"udpHop": map[string]any{"ports": "20000-50000"}},
+			},
+		}, "30000-40000"},
+		{"udphop mask without remotePorts", withHopMask(""), ""},
 		{"trimmed", withHop("  443,20000-50000  "), "443,20000-50000"},
 		{"empty string", withHop(""), ""},
 		{"non-string", withHop(float64(443)), ""},

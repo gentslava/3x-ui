@@ -9,8 +9,10 @@ import (
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
+	"github.com/mhsanaei/3x-ui/v3/internal/logger"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type HwidRequest struct {
@@ -31,7 +33,22 @@ type HwidGateResult struct {
 	Registered        int
 }
 
-const minHwidLength = 6
+// HwidSlotStatus is the aggregate device-slot view exposed to subscribers:
+// counters only, no hwid value or hash, no email, no device metadata.
+type HwidSlotStatus struct {
+	Active     bool `json:"active" example:"true"`
+	Limit      int  `json:"limit" example:"2"`
+	Registered int  `json:"registered" example:"1"`
+	Remaining  int  `json:"remaining" example:"1"`
+	Full       bool `json:"full" example:"false"`
+}
+
+const (
+	minHwidLength         = 6
+	hwidFingerprintLength = 12
+)
+
+var errClientHwidWriteNotSerialized = errors.New("client HWID write requires the serialized transaction")
 
 type ClientHwidInfo struct {
 	Id          int    `json:"id"`
@@ -41,11 +58,19 @@ type ClientHwidInfo struct {
 	DeviceOS    string `json:"deviceOs"`
 	OsVersion   string `json:"osVersion"`
 	DeviceModel string `json:"deviceModel"`
+	Fingerprint string `json:"fingerprint"`
 }
 
 func hashHwid(raw string) string {
 	sum := sha256.Sum256([]byte(raw))
 	return hex.EncodeToString(sum[:])
+}
+
+func shortHwidFingerprint(hash string) string {
+	if len(hash) <= hwidFingerprintLength {
+		return hash
+	}
+	return hash[:hwidFingerprintLength]
 }
 
 func trimHwidMeta(s string) string {
@@ -89,12 +114,15 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	if err != nil {
 		return res, err
 	}
+	req = normalizeHwidRequest(req)
 	if limit <= 0 {
 		res.Allowed = true
+		if len(req.Hwid) >= minHwidLength {
+			trackUnlimitedHwid(db, subID, req)
+		}
 		return res, nil
 	}
 
-	req = normalizeHwidRequest(req)
 	res.Active = true
 	res.Limit = limit
 	if len(req.Hwid) < minHwidLength {
@@ -156,6 +184,58 @@ func (s *ClientService) EnforceHwidForSubID(subID string, req HwidRequest) (Hwid
 	return res, err
 }
 
+// trackUnlimitedHwid lists devices of a sub with no HWID limit in the panel. It is
+// best-effort: a failed write must not deny a subscription nothing restricts.
+func trackUnlimitedHwid(db *gorm.DB, subID string, req HwidRequest) {
+	now := time.Now().UnixMilli()
+	err := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "sub_id"}, {Name: "hwid_hash"}},
+		DoUpdates: clause.AssignmentColumns([]string{"last_seen", "user_agent", "device_os", "os_version", "device_model"}),
+	}).Create(&model.ClientHwid{SubID: subID, HwidHash: hashHwid(req.Hwid), FirstSeen: now, LastSeen: now, UserAgent: req.UserAgent, DeviceOS: req.DeviceOS, OsVersion: req.OsVersion, DeviceModel: req.DeviceModel}).Error
+	if err != nil {
+		logger.Warning("track HWID for unlimited subscription failed:", err)
+	}
+}
+
+// HwidSlotStatusForSubID is SELECT-only: it must never write client_hwids or
+// last_seen. Enabled-clients scope mirrors the gate, so limit == limit enforced.
+func (s *ClientService) HwidSlotStatusForSubID(subID string) (status HwidSlotStatus, found bool, err error) {
+	subID = strings.TrimSpace(subID)
+	if subID == "" {
+		return status, false, nil
+	}
+
+	db := database.GetDB()
+	var enabled int64
+	if err := db.Model(&model.ClientRecord{}).
+		Where("sub_id = ? AND enable = ?", subID, true).
+		Count(&enabled).Error; err != nil {
+		return status, false, err
+	}
+	if enabled == 0 {
+		return status, false, nil
+	}
+
+	limit, err := effectiveHwidLimitForSubID(db, subID)
+	if err != nil {
+		return status, false, err
+	}
+	if limit <= 0 {
+		return status, true, nil
+	}
+
+	var registered int64
+	if err := db.Model(&model.ClientHwid{}).Where("sub_id = ?", subID).Count(&registered).Error; err != nil {
+		return status, false, err
+	}
+	status.Active = true
+	status.Limit = limit
+	status.Registered = int(registered)
+	status.Remaining = max(limit-status.Registered, 0)
+	status.Full = status.Registered >= limit
+	return status, true, nil
+}
+
 func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) {
 	rec, err := s.GetRecordByEmail(nil, email)
 	if err != nil {
@@ -183,6 +263,7 @@ func (s *ClientService) ListClientHwids(email string) ([]ClientHwidInfo, error) 
 			DeviceOS:    r.DeviceOS,
 			OsVersion:   r.OsVersion,
 			DeviceModel: r.DeviceModel,
+			Fingerprint: shortHwidFingerprint(r.HwidHash),
 		})
 	}
 	return out, nil
@@ -221,9 +302,16 @@ func (s *ClientService) DeleteClientHwid(email string, id int) error {
 	return nil
 }
 
-func (s *ClientService) setClientLimitHwidByEmail(tx *gorm.DB, email string, limit int) error {
-	if tx == nil {
-		tx = database.GetDB()
+// Serialize the limit write and trim with SyncInbound and client deletion.
+func (s *ClientService) setClientLimitHwidByEmail(email string, limit int) error {
+	return runSerializedTx(func(tx *gorm.DB) error {
+		return s.setClientLimitHwidByEmailTx(tx, email, limit)
+	})
+}
+
+func (s *ClientService) setClientLimitHwidByEmailTx(tx *gorm.DB, email string, limit int) error {
+	if !isSerializedTx(tx) {
+		return errClientHwidWriteNotSerialized
 	}
 	if limit < 0 {
 		limit = 0
@@ -267,8 +355,8 @@ func trimClientHwidsForSubID(tx *gorm.DB, subID string, limit int) error {
 }
 
 func clearClientHwidsBySubIDTx(tx *gorm.DB, subIDs ...string) error {
-	if tx == nil {
-		tx = database.GetDB()
+	if !isSerializedTx(tx) {
+		return errClientHwidWriteNotSerialized
 	}
 	clean := make([]string, 0, len(subIDs))
 	seen := map[string]struct{}{}

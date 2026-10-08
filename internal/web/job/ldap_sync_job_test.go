@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 	"github.com/mhsanaei/3x-ui/v3/internal/web/service"
 )
@@ -13,10 +14,7 @@ func initLdapJobDB(t *testing.T) {
 	t.Helper()
 	dbDir := t.TempDir()
 	t.Setenv("XUI_DB_FOLDER", dbDir)
-	if err := database.InitDB(filepath.Join(dbDir, "x-ui.db")); err != nil {
-		t.Fatalf("InitDB: %v", err)
-	}
-	t.Cleanup(func() { _ = database.CloseDB() })
+	dbtest.InitDB(t, filepath.Join(dbDir, "x-ui.db"))
 }
 
 func TestBuildClient_ConvertsDefaultTotalGBToBytes(t *testing.T) {
@@ -89,5 +87,44 @@ func TestLdapCreateClients_AttachesToAllConfiguredInbounds(t *testing.T) {
 	}
 	if vlessClients[0].ID == "" {
 		t.Error("vless inbound client must get a generated uuid")
+	}
+}
+
+// TestLdapCreateClients_FlagsRestartWhenEveryClientPartlyApplies pins that the
+// restart survives created == 0, the case a partly-applied batch always hits.
+func TestLdapCreateClients_FlagsRestartWhenEveryClientPartlyApplies(t *testing.T) {
+	initLdapJobDB(t)
+	db := database.GetDB()
+
+	healthy := &model.Inbound{
+		UserId: 1, Tag: "in-42180-tcp", Enable: true, Port: 42180,
+		Protocol: model.VLESS, Settings: `{"clients": []}`,
+		StreamSettings: `{"network":"tcp","security":"none"}`,
+	}
+	broken := &model.Inbound{
+		UserId: 1, Tag: "in-42181-tcp", Enable: true, Port: 42181,
+		Protocol: model.VLESS, Settings: `{"clients":`,
+		StreamSettings: `{"network":"tcp","security":"none"}`,
+	}
+	for _, ib := range []*model.Inbound{healthy, broken} {
+		if err := db.Create(ib).Error; err != nil {
+			t.Fatalf("create inbound %s: %v", ib.Tag, err)
+		}
+	}
+
+	j := NewLdapSyncJob()
+	j.xrayService.IsNeedRestartAndSetFalse()
+	j.createClients([]model.Client{j.buildClient("partial@example.com", 0, 0, 0)},
+		[]int{healthy.Id, broken.Id}, []string{healthy.Tag, broken.Tag})
+
+	clients, err := (&service.ClientService{}).ListForInbound(nil, healthy.Id)
+	if err != nil {
+		t.Fatalf("ListForInbound(%s): %v", healthy.Tag, err)
+	}
+	if len(clients) != 1 {
+		t.Fatalf("healthy inbound holds %d clients, want the partly-applied 1", len(clients))
+	}
+	if !j.xrayService.IsNeedRestartAndSetFalse() {
+		t.Fatal("a partly-applied LDAP batch left Xray unflagged for restart")
 	}
 }

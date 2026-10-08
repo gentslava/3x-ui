@@ -12,8 +12,8 @@ export type ProcessState = z.infer<typeof ProcessStateSchema>;
 export const ProtocolSchema = z.string();
 export type Protocol = z.infer<typeof ProtocolSchema>;
 
-export const SubLinkProviderSchema = z.unknown();
-export type SubLinkProvider = z.infer<typeof SubLinkProviderSchema>;
+export const addrFamilySchema = z.number().int();
+export type addrFamily = z.infer<typeof addrFamilySchema>;
 
 export const staticEgressResolverSchema = z.string();
 export type staticEgressResolver = z.infer<typeof staticEgressResolverSchema>;
@@ -26,9 +26,21 @@ export type transportBits = z.infer<typeof transportBitsSchema>;
 
 export const AllSettingSchema = z.object({
   datepicker: z.string(),
+  discordAdminIds: z.string(),
+  discordBotBackup: z.boolean(),
+  discordBotEnable: z.boolean(),
+  discordBotToken: z.string(),
+  discordChannelId: z.string(),
+  discordCpu: z.number().int().min(0).max(100),
+  discordEnabledEvents: z.string(),
+  discordLang: z.string(),
+  discordMemory: z.number().int().min(0).max(100),
+  discordRunTime: z.string(),
   expireDiff: z.number().int().min(0),
+  externalSubUserAgent: z.string(),
   externalTrafficInformEnable: z.boolean(),
   externalTrafficInformURI: z.string(),
+  happLinkEnable: z.boolean(),
   ipLimitAllowlist: z.string(),
   ldapAutoCreate: z.boolean(),
   ldapAutoDelete: z.boolean(),
@@ -54,6 +66,7 @@ export const AllSettingSchema = z.object({
   outboundDownThreshold: z.number().int().min(1).max(100),
   pageSize: z.number().int().min(0).max(1000),
   panelOutbound: z.string(),
+  realityScanCandidates: z.string(),
   remarkTemplate: z.string(),
   restartXrayOnClientDisable: z.boolean(),
   sessionMaxAge: z.number().int().min(1).max(525600),
@@ -70,6 +83,7 @@ export const AllSettingSchema = z.object({
   smtpTo: z.string(),
   smtpUsername: z.string(),
   subAnnounce: z.string(),
+  subCalendarExpireInclusive: z.boolean(),
   subCertFile: z.string(),
   subClashAutoDetect: z.boolean(),
   subClashEnable: z.boolean(),
@@ -82,16 +96,72 @@ export const AllSettingSchema = z.object({
   subEnable: z.boolean(),
   subEnableRouting: z.boolean(),
   subEncrypt: z.boolean(),
+  subExpiredTemplate: z.string(),
+  subHappAlwaysHwid: z.boolean(),
+  subHappAutoConnect: z.boolean(),
+  subHappAutoConnectType: z.string(),
+  subHappAutoDetect: z.boolean(),
+  subHappColorProfile: z.string(),
+  subHappExcludeApns: z.boolean(),
+  subHappExcludeRoutes: z.string(),
+  subHappFallbackUrl: z.string(),
+  subHappLocalProxyAuth: z.string(),
+  subHappNewUrl: z.string(),
+  subHappNoLimit: z.boolean(),
+  subHappNotificationExpire: z.boolean(),
+  subHappPerAppList: z.string(),
+  subHappPerAppMode: z.string(),
+  subHappPingType: z.string(),
+  subHappProviderId: z.string(),
+  subHappSubExpire: z.boolean(),
+  subHappSubExpireButtonLink: z.string(),
+  subHappSubInfoButtonLink: z.string(),
+  subHappSubInfoButtonText: z.string(),
+  subHappSubInfoColor: z.string(),
+  subHappSubInfoText: z.string(),
+  subHappTunMode: z.string(),
+  subHappTunType: z.string(),
   subHideSettings: z.boolean(),
+  subIncyAnnounceUrl: z.string(),
+  subIncyAppAutoDetect: z.boolean(),
+  subIncyBannerBgColor: z.string(),
+  subIncyBannerButtonColor: z.string(),
+  subIncyBannerButtonText: z.string(),
+  subIncyBannerButtonUrl: z.string(),
+  subIncyBannerText: z.string(),
   subIncyEnableRouting: z.boolean(),
+  subIncyFragmentInterval: z.string(),
+  subIncyFragmentLength: z.string(),
+  subIncyFragmentPackets: z.string(),
+  subIncyFragmentationEnable: z.string(),
+  subIncyHideCheck: z.string(),
+  subIncyHideUrl: z.string(),
+  subIncyNoLimitEnabled: z.string(),
+  subIncyNoisesDelay: z.string(),
+  subIncyNoisesEnable: z.string(),
+  subIncyNoisesPacket: z.string(),
+  subIncyNoisesType: z.string(),
+  subIncyPerAppEnable: z.string(),
+  subIncyPerAppList: z.string(),
+  subIncyPerAppMode: z.string(),
+  subIncyPremiumUrl: z.string(),
+  subIncyProfileDescription: z.string(),
+  subIncyResolveDnsDomain: z.string(),
+  subIncyResolveDnsIp: z.string(),
+  subIncyResolveEnable: z.string(),
   subIncyRoutingRules: z.string(),
+  subIncySortOrder: z.string(),
+  subIncySupportEmail: z.string(),
+  subInfoNodeEnable: z.boolean(),
   subJsonAlwaysArray: z.boolean(),
   subJsonAutoDetect: z.boolean(),
+  subJsonDns: z.string(),
   subJsonEnable: z.boolean(),
   subJsonFinalMask: z.string(),
   subJsonMux: z.string(),
   subJsonObservatory: z.string(),
   subJsonPath: z.string(),
+  subJsonRoutingRules: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
@@ -99,12 +169,14 @@ export const AllSettingSchema = z.object({
   subListen: z.string(),
   subPath: z.string(),
   subPort: z.number().int().min(1).max(65535),
+  subProfileMode: z.string(),
   subProfileUrl: z.string(),
   subRoutingRules: z.string(),
   subShowIdentityOnAllLinks: z.boolean(),
   subSupportUrl: z.string(),
   subThemeDir: z.string(),
   subTitle: z.string(),
+  subTrafficDepletedTemplate: z.string(),
   subURI: z.string(),
   subUpdates: z.number().int().min(0).max(525600),
   tgBotAPIServer: z.string(),
@@ -135,10 +207,23 @@ export type AllSetting = z.infer<typeof AllSettingSchema>;
 
 export const AllSettingViewSchema = z.object({
   datepicker: z.string(),
+  discordAdminIds: z.string(),
+  discordBotBackup: z.boolean(),
+  discordBotEnable: z.boolean(),
+  discordBotToken: z.string(),
+  discordChannelId: z.string(),
+  discordCpu: z.number().int().min(0).max(100),
+  discordEnabledEvents: z.string(),
+  discordLang: z.string(),
+  discordMemory: z.number().int().min(0).max(100),
+  discordRunTime: z.string(),
   expireDiff: z.number().int().min(0),
+  externalSubUserAgent: z.string(),
   externalTrafficInformEnable: z.boolean(),
   externalTrafficInformURI: z.string(),
+  happLinkEnable: z.boolean(),
   hasApiToken: z.boolean(),
+  hasDiscordBotToken: z.boolean(),
   hasLdapPassword: z.boolean(),
   hasNordSecret: z.boolean(),
   hasSmtpPassword: z.boolean(),
@@ -170,6 +255,7 @@ export const AllSettingViewSchema = z.object({
   outboundDownThreshold: z.number().int().min(1).max(100),
   pageSize: z.number().int().min(0).max(1000),
   panelOutbound: z.string(),
+  realityScanCandidates: z.string(),
   remarkTemplate: z.string(),
   restartXrayOnClientDisable: z.boolean(),
   sessionMaxAge: z.number().int().min(1).max(525600),
@@ -186,6 +272,7 @@ export const AllSettingViewSchema = z.object({
   smtpTo: z.string(),
   smtpUsername: z.string(),
   subAnnounce: z.string(),
+  subCalendarExpireInclusive: z.boolean(),
   subCertFile: z.string(),
   subClashAutoDetect: z.boolean(),
   subClashEnable: z.boolean(),
@@ -198,16 +285,72 @@ export const AllSettingViewSchema = z.object({
   subEnable: z.boolean(),
   subEnableRouting: z.boolean(),
   subEncrypt: z.boolean(),
+  subExpiredTemplate: z.string(),
+  subHappAlwaysHwid: z.boolean(),
+  subHappAutoConnect: z.boolean(),
+  subHappAutoConnectType: z.string(),
+  subHappAutoDetect: z.boolean(),
+  subHappColorProfile: z.string(),
+  subHappExcludeApns: z.boolean(),
+  subHappExcludeRoutes: z.string(),
+  subHappFallbackUrl: z.string(),
+  subHappLocalProxyAuth: z.string(),
+  subHappNewUrl: z.string(),
+  subHappNoLimit: z.boolean(),
+  subHappNotificationExpire: z.boolean(),
+  subHappPerAppList: z.string(),
+  subHappPerAppMode: z.string(),
+  subHappPingType: z.string(),
+  subHappProviderId: z.string(),
+  subHappSubExpire: z.boolean(),
+  subHappSubExpireButtonLink: z.string(),
+  subHappSubInfoButtonLink: z.string(),
+  subHappSubInfoButtonText: z.string(),
+  subHappSubInfoColor: z.string(),
+  subHappSubInfoText: z.string(),
+  subHappTunMode: z.string(),
+  subHappTunType: z.string(),
   subHideSettings: z.boolean(),
+  subIncyAnnounceUrl: z.string(),
+  subIncyAppAutoDetect: z.boolean(),
+  subIncyBannerBgColor: z.string(),
+  subIncyBannerButtonColor: z.string(),
+  subIncyBannerButtonText: z.string(),
+  subIncyBannerButtonUrl: z.string(),
+  subIncyBannerText: z.string(),
   subIncyEnableRouting: z.boolean(),
+  subIncyFragmentInterval: z.string(),
+  subIncyFragmentLength: z.string(),
+  subIncyFragmentPackets: z.string(),
+  subIncyFragmentationEnable: z.string(),
+  subIncyHideCheck: z.string(),
+  subIncyHideUrl: z.string(),
+  subIncyNoLimitEnabled: z.string(),
+  subIncyNoisesDelay: z.string(),
+  subIncyNoisesEnable: z.string(),
+  subIncyNoisesPacket: z.string(),
+  subIncyNoisesType: z.string(),
+  subIncyPerAppEnable: z.string(),
+  subIncyPerAppList: z.string(),
+  subIncyPerAppMode: z.string(),
+  subIncyPremiumUrl: z.string(),
+  subIncyProfileDescription: z.string(),
+  subIncyResolveDnsDomain: z.string(),
+  subIncyResolveDnsIp: z.string(),
+  subIncyResolveEnable: z.string(),
   subIncyRoutingRules: z.string(),
+  subIncySortOrder: z.string(),
+  subIncySupportEmail: z.string(),
+  subInfoNodeEnable: z.boolean(),
   subJsonAlwaysArray: z.boolean(),
   subJsonAutoDetect: z.boolean(),
+  subJsonDns: z.string(),
   subJsonEnable: z.boolean(),
   subJsonFinalMask: z.string(),
   subJsonMux: z.string(),
   subJsonObservatory: z.string(),
   subJsonPath: z.string(),
+  subJsonRoutingRules: z.string(),
   subJsonRules: z.string(),
   subJsonURI: z.string(),
   subJsonUserAgentRegex: z.string(),
@@ -215,12 +358,14 @@ export const AllSettingViewSchema = z.object({
   subListen: z.string(),
   subPath: z.string(),
   subPort: z.number().int().min(1).max(65535),
+  subProfileMode: z.string(),
   subProfileUrl: z.string(),
   subRoutingRules: z.string(),
   subShowIdentityOnAllLinks: z.boolean(),
   subSupportUrl: z.string(),
   subThemeDir: z.string(),
   subTitle: z.string(),
+  subTrafficDepletedTemplate: z.string(),
   subURI: z.string(),
   subUpdates: z.number().int().min(0).max(525600),
   tgBotAPIServer: z.string(),
@@ -292,7 +437,7 @@ export const ClientSchema = z.object({
   forwardedPorts: z.string().optional(),
   group: z.string().optional(),
   id: z.string().optional(),
-  keepAlive: z.number().int().optional(),
+  keepAlive: z.number().int().nullable().optional(),
   limitIp: z.number().int(),
   password: z.string().optional(),
   preSharedKey: z.string().optional(),
@@ -301,6 +446,7 @@ export const ClientSchema = z.object({
   reset: z.number().int(),
   resetDay: z.number().int(),
   resetMax: z.number().int(),
+  resetWeekday: z.number().int(),
   reverse: z.lazy(() => ClientReverseSchema).nullable().optional(),
   secret: z.string().optional(),
   security: z.string(),
@@ -320,6 +466,17 @@ export const ClientInboundSchema = z.object({
   inboundId: z.number().int(),
 });
 export type ClientInbound = z.infer<typeof ClientInboundSchema>;
+
+export const ClientPageResponseSchema = z.object({
+  filtered: z.number().int(),
+  groups: z.array(z.string()),
+  items: z.array(z.lazy(() => ClientSlimSchema)),
+  page: z.number().int(),
+  pageSize: z.number().int(),
+  summary: z.lazy(() => ClientsSummarySchema),
+  total: z.number().int(),
+});
+export type ClientPageResponse = z.infer<typeof ClientPageResponseSchema>;
 
 export const ClientRecordSchema = z.object({
   adTag: z.string(),
@@ -344,6 +501,7 @@ export const ClientRecordSchema = z.object({
   reset: z.number().int(),
   resetDay: z.number().int(),
   resetMax: z.number().int(),
+  resetWeekday: z.number().int(),
   reverse: z.unknown(),
   secret: z.string(),
   security: z.string(),
@@ -357,10 +515,54 @@ export const ClientRecordSchema = z.object({
 });
 export type ClientRecord = z.infer<typeof ClientRecordSchema>;
 
+export const ClientRenewalPreviewSchema = z.object({
+  canRenew: z.boolean(),
+  delayedStart: z.boolean(),
+  nextExpiry: z.string(),
+  renewAt: z.string(),
+  renewals: z.number().int(),
+  suggestedExpiry: z.string(),
+  suggestedExpiryTime: z.number().int(),
+  timeZone: z.string(),
+  validThrough: z.string(),
+});
+export type ClientRenewalPreview = z.infer<typeof ClientRenewalPreviewSchema>;
+
+export const ClientRenewalPreviewRequestSchema = z.object({
+  expiryTime: z.number().int(),
+  reset: z.number().int(),
+  resetCount: z.number().int(),
+  resetDay: z.number().int(),
+  resetMax: z.number().int(),
+  resetWeekday: z.number().int(),
+});
+export type ClientRenewalPreviewRequest = z.infer<typeof ClientRenewalPreviewRequestSchema>;
+
 export const ClientReverseSchema = z.object({
   tag: z.string(),
 });
 export type ClientReverse = z.infer<typeof ClientReverseSchema>;
+
+export const ClientSlimSchema = z.object({
+  comment: z.string().optional(),
+  createdAt: z.number().int(),
+  email: z.string(),
+  enable: z.boolean(),
+  expiryTime: z.number().int(),
+  group: z.string().optional(),
+  inboundIds: z.array(z.number().int()),
+  limitHwid: z.number().int(),
+  limitIp: z.number().int(),
+  reset: z.number().int(),
+  resetDay: z.number().int(),
+  resetMax: z.number().int(),
+  resetWeekday: z.number().int(),
+  subId: z.string(),
+  totalGB: z.number().int(),
+  traffic: z.lazy(() => ClientTrafficSchema).nullable().optional(),
+  updatedAt: z.number().int(),
+});
+export type ClientSlim = z.infer<typeof ClientSlimSchema>;
 
 export const ClientTrafficSchema = z.object({
   down: z.number().int(),
@@ -375,12 +577,27 @@ export const ClientTrafficSchema = z.object({
   resetCount: z.number().int(),
   resetDay: z.number().int(),
   resetMax: z.number().int(),
+  resetWeekday: z.number().int(),
   subId: z.string(),
   total: z.number().int(),
   up: z.number().int(),
   uuid: z.string(),
 });
 export type ClientTraffic = z.infer<typeof ClientTrafficSchema>;
+
+export const ClientsSummarySchema = z.object({
+  active: z.number().int(),
+  deactive: z.array(z.string()),
+  deactiveCount: z.number().int(),
+  depleted: z.array(z.string()),
+  depletedCount: z.number().int(),
+  expiring: z.array(z.string()),
+  expiringCount: z.number().int(),
+  online: z.array(z.string()),
+  onlineCount: z.number().int(),
+  total: z.number().int(),
+});
+export type ClientsSummary = z.infer<typeof ClientsSummarySchema>;
 
 export const FallbackParentInfoSchema = z.object({
   masterId: z.number().int(),
@@ -431,6 +648,11 @@ export const GeodataTokenIssueSchema = z.object({
 });
 export type GeodataTokenIssue = z.infer<typeof GeodataTokenIssueSchema>;
 
+export const HappLinkResultSchema = z.object({
+  encryptedLink: z.string(),
+});
+export type HappLinkResult = z.infer<typeof HappLinkResultSchema>;
+
 export const HistoryOfSeedersSchema = z.object({
   id: z.number().int(),
   seederName: z.string(),
@@ -441,6 +663,7 @@ export const HostSchema = z.object({
   address: z.string(),
   allowInsecure: z.boolean(),
   alpn: z.array(z.string()),
+  cipherSuites: z.string(),
   createdAt: z.number().int(),
   echConfigList: z.string(),
   excludeFromSubTypes: z.array(z.string()),
@@ -478,6 +701,7 @@ export type Host = z.infer<typeof HostSchema>;
 export const HostGroupSchema = z.object({
   allowInsecure: z.boolean(),
   alpn: z.array(z.string()),
+  cipherSuites: z.string(),
   echConfigList: z.string(),
   excludeFromSubTypes: z.array(z.string()),
   finalMask: z.string(),
@@ -510,11 +734,21 @@ export const HostGroupSchema = z.object({
 });
 export type HostGroup = z.infer<typeof HostGroupSchema>;
 
+export const HwidSlotStatusSchema = z.object({
+  active: z.boolean(),
+  full: z.boolean(),
+  limit: z.number().int(),
+  registered: z.number().int(),
+  remaining: z.number().int(),
+});
+export type HwidSlotStatus = z.infer<typeof HwidSlotStatusSchema>;
+
 export const InboundSchema = z.object({
   clientStats: z.array(z.lazy(() => ClientTrafficSchema)),
   disableFlow: z.boolean(),
   down: z.number().int(),
   enable: z.boolean(),
+  excludeFromSub: z.boolean(),
   expiryTime: z.number().int(),
   fallbackParent: z.lazy(() => FallbackParentInfoSchema).nullable().optional(),
   id: z.number().int(),
@@ -523,14 +757,14 @@ export const InboundSchema = z.object({
   nodeId: z.number().int().nullable().optional(),
   originNodeGuid: z.string().optional(),
   port: z.number().int().min(0).max(65535),
-  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg']),
+  protocol: z.enum(['vmess', 'vless', 'trojan', 'shadowsocks', 'wireguard', 'hysteria', 'http', 'mixed', 'tunnel', 'tun', 'mtproto', 'amneziawg', 'tuic']),
   remark: z.string(),
   settings: z.unknown(),
   shareAddr: z.string(),
   shareAddrStrategy: z.enum(['node', 'listen', 'custom']),
   sniffing: z.unknown(),
   streamSettings: z.unknown(),
-  subSortIndex: z.number().int().min(1),
+  subSortIndex: z.number().int(),
   tag: z.string(),
   total: z.number().int(),
   trafficReset: z.enum(['never', 'hourly', 'daily', 'weekly', 'monthly']),
@@ -565,21 +799,56 @@ export const InboundOptionSchema = z.object({
   id: z.number().int(),
   listen: z.string().optional(),
   mtprotoDomain: z.string().optional(),
+  network: z.string().optional(),
   nodeAddress: z.string().optional(),
   nodeId: z.number().int().nullable().optional(),
   port: z.number().int(),
   protocol: z.string(),
   remark: z.string(),
+  security: z.string().optional(),
   shareAddr: z.string().optional(),
   shareAddrStrategy: z.string().optional(),
   ssMethod: z.string(),
   tag: z.string(),
   tlsFlowCapable: z.boolean(),
+  tuicServer: z.lazy(() => TuicServerSettingsSchema).nullable().optional(),
   wgDns: z.string().optional(),
   wgMtu: z.number().int().optional(),
   wgPublicKey: z.string().optional(),
 });
 export type InboundOption = z.infer<typeof InboundOptionSchema>;
+
+export const InboundTrafficSummarySchema = z.object({
+  down: z.number().int(),
+  enable: z.boolean(),
+  id: z.number().int(),
+  total: z.number().int(),
+  up: z.number().int(),
+});
+export type InboundTrafficSummary = z.infer<typeof InboundTrafficSummarySchema>;
+
+export const LogEntrySchema = z.object({
+  DateTime: z.string(),
+  Email: z.string(),
+  Event: z.number().int(),
+  FromAddress: z.string(),
+  Inbound: z.string(),
+  Outbound: z.string(),
+  ToAddress: z.string(),
+});
+export type LogEntry = z.infer<typeof LogEntrySchema>;
+
+export const MLDSA65ResponseSchema = z.object({
+  seed: z.string(),
+  verify: z.string(),
+});
+export type MLDSA65Response = z.infer<typeof MLDSA65ResponseSchema>;
+
+export const MLKEM768ResponseSchema = z.object({
+  client: z.string(),
+  seed: z.string(),
+});
+export type MLKEM768Response = z.infer<typeof MLKEM768ResponseSchema>;
 
 export const MsgSchema = z.object({
   msg: z.string(),
@@ -587,6 +856,11 @@ export const MsgSchema = z.object({
   success: z.boolean(),
 });
 export type Msg = z.infer<typeof MsgSchema>;
+
+export const NewUUIDResponseSchema = z.object({
+  uuid: z.string(),
+});
+export type NewUUIDResponse = z.infer<typeof NewUUIDResponseSchema>;
 
 export const NodeSchema = z.object({
   activeCount: z.number().int(),
@@ -744,6 +1018,7 @@ export type ProbeResultUI = z.infer<typeof ProbeResultUISchema>;
 
 export const RealityScanResultSchema = z.object({
   alpn: z.string(),
+  certChainBytes: z.number().int(),
   certChainValid: z.boolean(),
   certIssuer: z.string(),
   certSubject: z.string(),
@@ -814,17 +1089,69 @@ export const SettingSchema = z.object({
 });
 export type Setting = z.infer<typeof SettingSchema>;
 
+export const SponsorSchema = z.object({
+  enable: z.boolean().nullable().optional(),
+  from: z.string().nullable().optional(),
+  id: z.string(),
+  link: z.string(),
+  logo: z.string().optional(),
+  name: z.string(),
+  slots: z.array(z.string()),
+  text: z.record(z.string(), z.string()),
+  title: z.record(z.string(), z.string()),
+  until: z.string(),
+});
+export type Sponsor = z.infer<typeof SponsorSchema>;
+
+export const SponsorListSchema = z.object({
+  contact: z.string().optional(),
+  sponsors: z.array(z.lazy(() => SponsorSchema)),
+});
+export type SponsorList = z.infer<typeof SponsorListSchema>;
+
 export const SubBalancerSchema = z.object({
   createdAt: z.number().int(),
   enabled: z.boolean(),
   id: z.number().int(),
   inboundIds: z.array(z.number().int()),
+  memberWeights: z.record(z.number().int(), z.number()).optional(),
   remark: z.string().max(256),
   sortOrder: z.number().int().min(1),
   strategy: z.enum(['leastLoad', 'leastPing', 'random', 'roundRobin']),
   updatedAt: z.number().int(),
 });
 export type SubBalancer = z.infer<typeof SubBalancerSchema>;
+
+export const TrafficSchema = z.object({
+  Down: z.number().int(),
+  IsInbound: z.boolean(),
+  IsOutbound: z.boolean(),
+  Tag: z.string(),
+  Up: z.number().int(),
+});
+export type Traffic = z.infer<typeof TrafficSchema>;
+
+export const TuicClientSettingsSchema = z.object({
+  email: z.string(),
+  password: z.string(),
+  uuid: z.string(),
+});
+export type TuicClientSettings = z.infer<typeof TuicClientSettingsSchema>;
+
+export const TuicServerSettingsSchema = z.object({
+  alpn: z.array(z.string()),
+  authentication_timeout: z.number().int(),
+  certificate: z.string(),
+  congestion_control: z.string(),
+  log_level: z.string(),
+  max_idle_time: z.number().int(),
+  max_udp_relay_packet_size: z.number().int(),
+  private_key: z.string(),
+  sni: z.string().optional(),
+  udp_relay_mode: z.string(),
+  zero_rtt_handshake: z.boolean(),
+});
+export type TuicServerSettings = z.infer<typeof TuicServerSettingsSchema>;
 
 export const UserSchema = z.object({
   id: z.number().int(),

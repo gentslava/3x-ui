@@ -19,7 +19,11 @@ import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import { HttpUtil, NumberFormatter, RandomUtil, SizeFormatter, Wireguard } from '@/utils';
 import type { RealityScanResult } from '@/generated/types';
-import { rawInboundToFormValues, formValuesToWirePayload } from '@/lib/xray/inbound-form-adapter';
+import {
+  rawInboundToFormValues,
+  formValuesToWirePayload,
+  withoutClients,
+} from '@/lib/xray/inbound-form-adapter';
 import { createDefaultInboundSettings } from '@/lib/xray/inbound-defaults';
 import { generateAwgObfuscation } from '@/lib/xray/amneziawg-obfuscation';
 import { composeInboundTag, isAutoInboundTag, type InboundTagInput } from '@/lib/xray/inbound-tag';
@@ -63,6 +67,7 @@ import {
   MixedFields,
   MtprotoFields,
   ShadowsocksFields,
+  TuicFields,
   TunFields,
   TunnelFields,
   VlessFields,
@@ -277,7 +282,8 @@ export default function InboundFormModal({
   const hasSelectableTransport =
     protocol !== Protocols.HYSTERIA &&
     protocol !== Protocols.WIREGUARD &&
-    protocol !== Protocols.TUNNEL;
+    protocol !== Protocols.TUNNEL &&
+    protocol !== Protocols.TUIC;
 
   const wPort = useWatch({ control, name: 'port' });
   const wListen = (useWatch({ control, name: 'listen' }) ?? '') as string;
@@ -437,7 +443,9 @@ export default function InboundFormModal({
   useEffect(() => {
     if (!open) return;
     const initial =
-      mode === 'edit' && dbInbound ? rawInboundToFormValues(dbInbound) : buildAddModeValues();
+      mode === 'edit' && dbInbound
+        ? withoutClients(rawInboundToFormValues(dbInbound))
+        : buildAddModeValues();
     methods.reset(initial);
     setScanResult(null);
     setActiveTab('basic');
@@ -490,8 +498,14 @@ export default function InboundFormModal({
    */
   useEffect(() => {
     if (!open) return;
-    if (!availableNodesFetched || !protocol) return;
+    if (!protocol) return;
     const current = getV('shareAddrStrategy') as InboundFormValues['shareAddrStrategy'] | undefined;
+    if (protocol === Protocols.MTPROTO) {
+      if (current !== 'listen') setV('shareAddrStrategy', 'listen');
+      if (getV('shareAddr')) setV('shareAddr', '');
+      return;
+    }
+    if (!availableNodesFetched) return;
     if (!nodeShareOptionAvailable && (current ?? 'node') === 'node') {
       setV('shareAddrStrategy', 'listen');
     }
@@ -548,17 +562,13 @@ export default function InboundFormModal({
   }, [mode, methods]);
 
   const saveValues = async () => {
-    /*
-     * getValues() returns the entire form store, including settings.clients and
-     * settings.fallbacks which have no bound field (clients are managed via the
-     * standalone Client modal, not this inbound modal). With shouldUnregister
-     * false those pass-through sub-trees survive from the reset object, so the
-     * update wire payload never silently drops every client on save.
-     */
+    // settings.fallbacks has no bound field; shouldUnregister=false keeps it from
+    // the reset object. An edit sends no clients: the server keeps the stored ones.
     const values = methods.getValues() as InboundFormValues;
     const parsed = InboundFormSchema.safeParse(values);
     if (!parsed.success) {
       const issues = parsed.error.issues;
+      setActiveTab(tabForValidationPath(issues[0].path));
       messageApi.error(formatInboundValidation(issues, values, t));
       console.error(
         '[InboundFormModal] schema validation failed:',
@@ -568,7 +578,7 @@ export default function InboundFormModal({
     }
     setSaving(true);
     try {
-      const payload = formValuesToWirePayload(parsed.data);
+      const payload = formValuesToWirePayload(parsed.data, { omitClients: mode === 'edit' });
       const url =
         mode === 'edit' && dbInbound
           ? `/panel/api/inbounds/update/${dbInbound.id}`
@@ -606,9 +616,11 @@ export default function InboundFormModal({
 
   const basicTab = (
     <>
-      <FormField name="enable" label={t('enable')} valueProp="checked">
-        <Switch />
-      </FormField>
+      {mode === 'add' && (
+        <FormField name="enable" label={t('enable')} valueProp="checked">
+          <Switch id="inbound-enable" />
+        </FormField>
+      )}
 
       <FormField name="remark" label={t('pages.inbounds.remark')}>
         <Input />
@@ -643,37 +655,42 @@ export default function InboundFormModal({
         <Input placeholder={t('pages.inbounds.monitorDesc')} />
       </FormField>
 
-      <FormField
-        name="shareAddrStrategy"
-        label={labelWithHint(
-          t('pages.inbounds.form.shareAddrStrategy'),
-          t('pages.inbounds.form.shareAddrStrategyHelp'),
-        )}
-      >
-        <Select
-          options={SHARE_ADDR_STRATEGIES.filter(
-            (strategy) => strategy !== 'node' || nodeShareOptionAvailable,
-          ).map((strategy) => ({
-            value: strategy,
-            label: t(`pages.inbounds.form.shareAddrStrategyOptions.${strategy}`),
-          }))}
-        />
-      </FormField>
+      {protocol !== Protocols.MTPROTO && (
+        <>
+          <FormField
+            name="shareAddrStrategy"
+            label={labelWithHint(
+              t('pages.inbounds.form.shareAddrStrategy'),
+              t('pages.inbounds.form.shareAddrStrategyHelp'),
+            )}
+          >
+            <Select
+              options={SHARE_ADDR_STRATEGIES.filter(
+                (strategy) => strategy !== 'node' || nodeShareOptionAvailable,
+              ).map((strategy) => ({
+                value: strategy,
+                label: t(`pages.inbounds.form.shareAddrStrategyOptions.${strategy}`),
+              }))}
+            />
+          </FormField>
 
-      {shareAddrStrategy === 'custom' && (
-        <FormField
-          name="shareAddr"
-          label={labelWithHint(
-            t('pages.inbounds.form.shareAddr'),
-            t('pages.inbounds.form.shareAddrHelp'),
+          {shareAddrStrategy === 'custom' && (
+            <FormField
+              name="shareAddr"
+              label={labelWithHint(
+                t('pages.inbounds.form.shareAddr'),
+                t('pages.inbounds.form.shareAddrHelp'),
+              )}
+              rules={{
+                validate: (value) =>
+                  isValidShareAddrInput(String(value ?? '')) ||
+                  t('pages.inbounds.form.shareAddrHelp'),
+              }}
+            >
+              <Input placeholder="edge.example.com" />
+            </FormField>
           )}
-          rules={{
-            validate: (value) =>
-              isValidShareAddrInput(String(value ?? '')) || t('pages.inbounds.form.shareAddrHelp'),
-          }}
-        >
-          <Input placeholder="edge.example.com" />
-        </FormField>
+        </>
       )}
 
       <FormField
@@ -683,7 +700,18 @@ export default function InboundFormModal({
           t('pages.inbounds.form.subSortIndexHelp'),
         )}
       >
-        <InputNumber min={1} />
+        <InputNumber />
+      </FormField>
+
+      <FormField
+        name="excludeFromSub"
+        valueProp="checked"
+        label={labelWithHint(
+          t('pages.inbounds.form.excludeFromSub'),
+          t('pages.inbounds.form.excludeFromSubHelp'),
+        )}
+      >
+        <Switch />
       </FormField>
 
       {protocol === Protocols.VLESS && (
@@ -784,6 +812,8 @@ export default function InboundFormModal({
           regenInboundAwgObfuscation={regenInboundAwgObfuscation}
         />
       )}
+
+      {protocol === Protocols.TUIC && <TuicFields />}
 
       {protocol === Protocols.TUN && <TunFields />}
 
@@ -1123,6 +1153,7 @@ export default function InboundFormModal({
                     Protocols.WIREGUARD,
                     Protocols.MTPROTO,
                     Protocols.AMNEZIAWG,
+                    Protocols.TUIC,
                   ] as string[]
                 ).includes(protocol) || isFallbackHost
                   ? [

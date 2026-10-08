@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 case $1 in
     amd64)
         ARCH="64"
@@ -32,7 +33,7 @@ if [ -z "$MTG_MULTI_VER" ]; then
 fi
 mkdir -p build/bin
 cd build/bin
-curl -sfLRO "https://github.com/XTLS/Xray-core/releases/download/v26.7.28/Xray-linux-${ARCH}.zip"
+curl -sfLRO "https://github.com/XTLS/Xray-core/releases/download/v26.9.30/Xray-linux-${ARCH}.zip"
 unzip "Xray-linux-${ARCH}.zip"
 rm -f "Xray-linux-${ARCH}.zip" geoip.dat geosite.dat
 mv xray "xray-linux-${FNAME}"

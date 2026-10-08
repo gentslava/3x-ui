@@ -196,6 +196,15 @@ func TestWireInboundCarriesDisableFlow(t *testing.T) {
 	}
 }
 
+func TestWireInboundCarriesExcludeFromSub(t *testing.T) {
+	if got := wireInbound(&model.Inbound{ExcludeFromSub: true}, 0).Get("excludeFromSub"); got != "true" {
+		t.Fatalf("excludeFromSub = %q, want true", got)
+	}
+	if got := wireInbound(&model.Inbound{}, 0).Get("excludeFromSub"); got != "false" {
+		t.Fatalf("excludeFromSub = %q, want false", got)
+	}
+}
+
 func TestRemoteHTTPClientEgressProxy(t *testing.T) {
 	// OutboundTag + a resolver → a dedicated proxy client (not the shared default).
 	withTag := NewRemote(&model.Node{Id: 1, Scheme: "https", TlsVerifyMode: "verify", OutboundTag: "warp"}, stubEgress{url: "socks5://127.0.0.1:1080"})
@@ -438,5 +447,66 @@ func TestSanitizeStreamSettingsForRemote(t *testing.T) {
 				t.Errorf("keyFile present=%v, want %v", hasKeyFile, tc.wantKeyFile)
 			}
 		})
+	}
+}
+
+// refreshRemoteIDs rebuilds the cache from node-reported tags only, so an
+// adopted alias must be re-applied or every later op on that inbound misses.
+func TestRemoteAdoptedAliasSurvivesRefresh(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if req.URL.Path == "/panel/api/inbounds/list" {
+			_, _ = w.Write([]byte(`{"success":true,"obj":[{"id":5,"tag":"legacy-in"},{"id":6,"tag":"in-2"}]}`))
+			return
+		}
+		http.NotFound(w, req)
+	}))
+	defer srv.Close()
+
+	r := NewRemote(nodeForPlainServer(t, srv, "verify", "tok"), nil)
+	central := &model.Inbound{Tag: "central-in", Settings: `{"clients":[]}`}
+	r.AdoptInboundAlias(central, RemoteInboundOption{Id: 5, Tag: "legacy-in"})
+
+	// Resolving a different tag misses the cache and forces a full refresh.
+	if _, err := r.resolveRemoteID(context.Background(), "in-2"); err != nil {
+		t.Fatalf("resolveRemoteID(in-2): %v", err)
+	}
+
+	id, err := r.resolveRemoteID(context.Background(), central.Tag)
+	if err != nil {
+		t.Fatalf("resolveRemoteID(%s) after refresh: %v", central.Tag, err)
+	}
+	if id != 5 {
+		t.Fatalf("adopted alias resolved to %d, want 5", id)
+	}
+}
+
+// A stale alias must never outrank the node's own report: once the node lists
+// an inbound under the central tag itself, that id is the authoritative one.
+func TestRemoteAdoptedAliasYieldsToNodeReportedTag(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if req.URL.Path == "/panel/api/inbounds/list" {
+			_, _ = w.Write([]byte(`{"success":true,"obj":[{"id":5,"tag":"central-in"},{"id":7,"tag":"legacy-in"},{"id":9,"tag":"in-2"}]}`))
+			return
+		}
+		http.NotFound(w, req)
+	}))
+	defer srv.Close()
+
+	r := NewRemote(nodeForPlainServer(t, srv, "verify", "tok"), nil)
+	central := &model.Inbound{Tag: "central-in", Settings: `{"clients":[]}`}
+	r.AdoptInboundAlias(central, RemoteInboundOption{Id: 7, Tag: "legacy-in"})
+
+	if _, err := r.resolveRemoteID(context.Background(), "in-2"); err != nil {
+		t.Fatalf("resolveRemoteID(in-2): %v", err)
+	}
+
+	id, err := r.resolveRemoteID(context.Background(), central.Tag)
+	if err != nil {
+		t.Fatalf("resolveRemoteID(%s): %v", central.Tag, err)
+	}
+	if id != 5 {
+		t.Fatalf("central tag resolved to %d via a stale alias, want 5 (the id the node reports)", id)
 	}
 }

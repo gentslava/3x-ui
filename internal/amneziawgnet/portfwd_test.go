@@ -6,10 +6,10 @@ import (
 	"io"
 	"net"
 	"net/netip"
+	"sync"
 	"testing"
 	"time"
 
-	awgconn "github.com/amnezia-vpn/amneziawg-go/v3/conn"
 	"github.com/amnezia-vpn/amneziawg-go/v3/device"
 	"github.com/amnezia-vpn/amneziawg-go/v3/tun/netstack"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -189,7 +189,7 @@ func TestPortForwardSetReconcileSurvivesPreBoundPort(t *testing.T) {
 
 	const collidingPort = 58911
 	const okPort = 58912
-	blocker, err := net.Listen("tcp", fmt.Sprintf(":%d", collidingPort))
+	blocker, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", collidingPort))
 	if err != nil {
 		t.Fatalf("pre-bind test port: %v", err)
 	}
@@ -283,8 +283,12 @@ func TestPortForwardRoundTripTCPAndUDP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("client CreateNetTUN: %v", err)
 	}
-	clientDev := device.NewDevice(clientTun, awgconn.NewDefaultBind(), device.NewLogger(device.LogLevelSilent, ""))
+	clientDev := device.NewDevice(clientTun, newListenBind(""), device.NewLogger(device.LogLevelSilent, ""))
 	defer clientDev.Close()
+	// clientDev.Close() closes the tun's packet channel without waiting for
+	// writers, so every goroutine writing into clientNet must be gone first.
+	var clientSvc sync.WaitGroup
+	defer clientSvc.Wait()
 
 	clientPrivHex, err := wireguard.KeyToHex(clientPriv)
 	if err != nil {
@@ -338,13 +342,16 @@ primed:
 		t.Fatalf("client ListenTCP: %v", err)
 	}
 	defer tcpSvc.Close()
+	clientSvc.Add(1)
 	go func() {
+		defer clientSvc.Done()
 		for {
 			c, err := tcpSvc.Accept()
 			if err != nil {
 				return
 			}
-			go func() { io.Copy(c, c); c.Close() }()
+			clientSvc.Add(1)
+			go func() { defer clientSvc.Done(); io.Copy(c, c); c.Close() }()
 		}
 	}()
 
@@ -353,7 +360,9 @@ primed:
 		t.Fatalf("client ListenUDP: %v", err)
 	}
 	defer udpSvc.Close()
+	clientSvc.Add(1)
 	go func() {
+		defer clientSvc.Done()
 		buf := make([]byte, 1500)
 		for {
 			n, addr, err := udpSvc.ReadFrom(buf)

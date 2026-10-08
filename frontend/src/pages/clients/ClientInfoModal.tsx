@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 
 import { ClipboardManager, FileManager, HttpUtil, IntlUtil, SizeFormatter } from '@/utils';
-import { formatInboundLabel } from '@/lib/inbounds/label';
+import { formatInboundLabel, formatTunnelConfigMeta } from '@/lib/inbounds/label';
 import { normalizeClientIps, type ClientIpInfo } from '@/lib/clients/ip-log';
 import { useDatepicker } from '@/hooks/useDatepicker';
 import { useClientHwids } from '@/hooks/useClientHwids';
@@ -22,14 +22,16 @@ import ClientHwidListModal from '@/components/clients/ClientHwidList';
 import ConfigBlock from '@/components/clients/ConfigBlock';
 import {
   buildWireguardClientConfig,
-  findWireguardInbound,
+  findWireguardInbounds,
   isWireguardClient,
 } from './wireguardConfig';
 import {
   buildAmneziaWGClientConfig,
-  findAmneziaWGInbound,
+  findAmneziaWGInbounds,
   isAmneziaWGClient,
 } from './amneziawgConfig';
+import { tunnelConfigEndpoints, tunnelEndpointLabel } from './tunnelEndpoints';
+import type { HostRecord } from '@/schemas/api/host';
 import './ClientInfoModal.css';
 
 const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
@@ -44,6 +46,7 @@ const INBOUND_PROTOCOL_COLORS: Record<string, string> = {
   http: 'purple',
   mixed: 'lime',
   tunnel: 'orange',
+  tuic: 'orange',
 };
 
 const INBOUND_CHIP_LIMIT = 1;
@@ -65,8 +68,11 @@ interface ClientInfoModalProps {
   tunnelAllowedIPs?: Record<number, string>;
   isOnline: boolean;
   subSettings?: SubSettings;
+  hosts?: HostRecord[];
   onOpenChange: (open: boolean) => void;
 }
+
+const NO_HOSTS: HostRecord[] = [];
 
 interface ApiMsg<T = unknown> {
   success?: boolean;
@@ -96,6 +102,7 @@ export default function ClientInfoModal({
   tunnelAllowedIPs,
   isOnline,
   subSettings = DEFAULT_SUB,
+  hosts = NO_HOSTS,
   onOpenChange,
 }: ClientInfoModalProps) {
   const { datepicker } = useDatepicker();
@@ -180,35 +187,45 @@ export default function ClientInfoModal({
       : '';
 
   const showSubscription = !!(subSettings?.enable && client?.subId);
-  const wgInbound = useMemo(
-    () => findWireguardInbound(client, inboundsById),
+  const wgInbounds = useMemo(
+    () => findWireguardInbounds(client, inboundsById),
     [client, inboundsById],
   );
-  const wgConfigText = useMemo(() => {
-    if (!client || !wgInbound || !isWireguardClient(client)) return '';
-    return buildWireguardClientConfig(
-      client,
-      wgInbound,
-      window.location.hostname,
-      subSettings?.publicHost ?? '',
-    );
-  }, [client, wgInbound, subSettings?.publicHost]);
+  const wgConfigs = useMemo(() => {
+    if (!client || !isWireguardClient(client)) return [];
+    const host = window.location.hostname;
+    const publicHost = subSettings?.publicHost ?? '';
+    return wgInbounds
+      .flatMap((ib) => {
+        const address = tunnelAllowedIPs?.[ib.id] ?? '';
+        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+          inbound: ib,
+          endpoint: tunnelEndpointLabel(ep),
+          text: buildWireguardClientConfig(client, ib, host, publicHost, address, ep),
+        }));
+      })
+      .filter((c) => !!c.text);
+  }, [client, wgInbounds, tunnelAllowedIPs, subSettings?.publicHost, hosts]);
 
-  const awgInbound = useMemo(
-    () => findAmneziaWGInbound(client, inboundsById),
+  const awgInbounds = useMemo(
+    () => findAmneziaWGInbounds(client, inboundsById),
     [client, inboundsById],
   );
-  const awgConfigText = useMemo(() => {
-    if (!client || !awgInbound || !isAmneziaWGClient(client)) return '';
-    const address = awgInbound ? (tunnelAllowedIPs?.[awgInbound.id] ?? '') : '';
-    return buildAmneziaWGClientConfig(
-      client,
-      awgInbound,
-      window.location.hostname,
-      subSettings?.publicHost ?? '',
-      address,
-    );
-  }, [client, awgInbound, tunnelAllowedIPs, subSettings?.publicHost]);
+  const awgConfigs = useMemo(() => {
+    if (!client || !isAmneziaWGClient(client)) return [];
+    const host = window.location.hostname;
+    const publicHost = subSettings?.publicHost ?? '';
+    return awgInbounds
+      .flatMap((ib) => {
+        const address = tunnelAllowedIPs?.[ib.id] ?? '';
+        return tunnelConfigEndpoints(ib, hosts, host, publicHost).map((ep) => ({
+          inbound: ib,
+          endpoint: tunnelEndpointLabel(ep),
+          text: buildAmneziaWGClientConfig(client, ib, host, publicHost, address, ep),
+        }));
+      })
+      .filter((c) => !!c.text);
+  }, [client, awgInbounds, tunnelAllowedIPs, subSettings?.publicHost, hosts]);
 
   async function copyValue(text: string) {
     if (!text) return;
@@ -779,27 +796,51 @@ export default function ClientInfoModal({
               </>
             )}
 
-            {wgConfigText && client && (
+            {wgConfigs.length > 0 && client && (
               <>
                 <Divider>{t('pages.clients.wireguardConfig')}</Divider>
-                <ConfigBlock
-                  label={t('pages.clients.config')}
-                  text={wgConfigText}
-                  fileName={`${client.email}.conf`}
-                  qrRemark={client.email || 'peer'}
-                />
+                {wgConfigs.map(({ inbound, endpoint, text }) => {
+                  const meta = formatTunnelConfigMeta(
+                    inbound,
+                    client.email,
+                    wgConfigs.length,
+                    endpoint,
+                  );
+                  return (
+                    <ConfigBlock
+                      key={`wg-${inbound.id}-${endpoint}`}
+                      label={meta.label || t('pages.clients.config')}
+                      text={text}
+                      fileName={meta.fileName}
+                      qrRemark={meta.qrRemark}
+                      tagColor="cyan"
+                    />
+                  );
+                })}
               </>
             )}
 
-            {awgConfigText && client && (
+            {awgConfigs.length > 0 && client && (
               <>
                 <Divider>{t('pages.clients.amneziaWgConfig')}</Divider>
-                <ConfigBlock
-                  label={t('pages.clients.config')}
-                  text={awgConfigText}
-                  fileName={`${client.email}.conf`}
-                  qrRemark={client.email || 'peer'}
-                />
+                {awgConfigs.map(({ inbound, endpoint, text }) => {
+                  const meta = formatTunnelConfigMeta(
+                    inbound,
+                    client.email,
+                    awgConfigs.length,
+                    endpoint,
+                  );
+                  return (
+                    <ConfigBlock
+                      key={`awg-${inbound.id}-${endpoint}`}
+                      label={meta.label || t('pages.clients.config')}
+                      text={text}
+                      fileName={meta.fileName}
+                      qrRemark={meta.qrRemark}
+                      tagColor="purple"
+                    />
+                  );
+                })}
               </>
             )}
           </>

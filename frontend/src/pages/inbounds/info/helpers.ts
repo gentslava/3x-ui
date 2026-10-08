@@ -17,6 +17,7 @@ const LINK_PROTOCOLS: ReadonlySet<string> = new Set([
   Protocols.SHADOWSOCKS,
   Protocols.HYSTERIA,
   Protocols.MTPROTO,
+  Protocols.TUIC,
 ]);
 
 export function hasShareLink(protocol: string): boolean {
@@ -159,6 +160,12 @@ export function copyText(value: unknown, t: (k: string) => string) {
 
 export function downloadText(content: string, filename: string) {
   FileManager.downloadTextFile(content, filename);
+}
+
+// One file per advertised Host, so a peer behind two Hosts gets two names.
+export function peerConfFileName(peerIndex: number, endpointIndex: number, endpointCount: number) {
+  const suffix = endpointCount > 1 ? `-${endpointIndex + 1}` : '';
+  return `peer-${peerIndex + 1}${suffix}.conf`;
 }
 
 export function statsColor(stats: ClientStats, trafficDiff: number) {

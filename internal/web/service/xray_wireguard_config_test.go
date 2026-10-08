@@ -55,6 +55,62 @@ func seedWGInbound(t *testing.T, tag string, port int, clients []model.Client) {
 	}
 }
 
+func seedDualTunnelClient(t *testing.T, enabled bool, wgKeepAlive *int) string {
+	t.Helper()
+	setupSettingTestDB(t)
+	db := database.GetDB()
+
+	const email = "dual@wg.test"
+	wgClient := model.Client{
+		Email:        email,
+		Enable:       true,
+		PublicKey:    "pub-wg",
+		AllowedIPs:   []string{"10.0.0.5/32"},
+		PreSharedKey: "wg-psk",
+		KeepAlive:    wgKeepAlive,
+	}
+	awgClient := wgClient
+	awgClient.PublicKey = "pub-awg"
+	awgClient.AllowedIPs = []string{"10.8.1.5/32"}
+	awgClient.PreSharedKey = "awg-psk"
+	awgClient.KeepAlive = model.KeepAlivePtr(25)
+
+	wgSettings, err := json.Marshal(map[string]any{
+		"secretKey": wgTestSecretKey(),
+		"mtu":       1420,
+		"clients":   []model.Client{wgClient},
+	})
+	if err != nil {
+		t.Fatalf("marshal wg settings: %v", err)
+	}
+	awgSettings, err := json.Marshal(map[string]any{
+		"server":  map[string]any{"subnetIp": "10.8.1.0", "subnetCidr": 24},
+		"clients": []model.Client{awgClient},
+	})
+	if err != nil {
+		t.Fatalf("marshal awg settings: %v", err)
+	}
+
+	wgInbound := &model.Inbound{Tag: "wg-dual", Enable: true, Port: 51823, Protocol: model.WireGuard, Settings: string(wgSettings)}
+	awgInbound := &model.Inbound{Tag: "awg-dual", Enable: true, Port: 51824, Protocol: model.AmneziaWG, Settings: string(awgSettings)}
+	if err := db.Create(wgInbound).Error; err != nil {
+		t.Fatalf("create wg inbound: %v", err)
+	}
+	if err := db.Create(awgInbound).Error; err != nil {
+		t.Fatalf("create awg inbound: %v", err)
+	}
+
+	svc := ClientService{}
+	if err := svc.SyncInbound(nil, wgInbound.Id, []model.Client{wgClient}); err != nil {
+		t.Fatalf("SyncInbound(wg): %v", err)
+	}
+	awgClient.Enable = enabled
+	if err := svc.SyncInbound(nil, awgInbound.Id, []model.Client{awgClient}); err != nil {
+		t.Fatalf("SyncInbound(awg): %v", err)
+	}
+	return email
+}
+
 func wgPeerList(t *testing.T, settings map[string]any) []map[string]any {
 	t.Helper()
 	if _, ok := settings["clients"]; ok {
@@ -77,7 +133,7 @@ func wgPeerList(t *testing.T, settings map[string]any) []map[string]any {
 
 func TestGetXrayConfigWireGuardPeers(t *testing.T) {
 	clients := []model.Client{
-		{Email: "alice@wg.test", Enable: true, PublicKey: "pub-alice", AllowedIPs: []string{"10.0.0.2/32"}, KeepAlive: 25},
+		{Email: "alice@wg.test", Enable: true, PublicKey: "pub-alice", AllowedIPs: []string{"10.0.0.2/32"}, KeepAlive: model.KeepAlivePtr(25)},
 		{Email: "bob@wg.test", Enable: true, PublicKey: "pub-bob", AllowedIPs: []string{"10.0.0.3/32"}},
 	}
 	seedWGInbound(t, "wg-multi", 51820, clients)
@@ -134,6 +190,68 @@ func TestGetXrayConfigWireGuardDisabledClientExcluded(t *testing.T) {
 	}
 	if peers[0]["email"] != "on@wg.test" {
 		t.Errorf("wrong peer kept: %v", peers[0])
+	}
+}
+
+func TestGetXrayConfigWireGuardUsesInboundLocalTunnelFields(t *testing.T) {
+	email := seedDualTunnelClient(t, true, model.KeepAlivePtr(15))
+
+	var shared model.ClientRecord
+	if err := database.GetDB().Where("email = ?", email).First(&shared).Error; err != nil {
+		t.Fatalf("read shared client: %v", err)
+	}
+	if shared.AllowedIPs != "10.8.1.5/32" || shared.PreSharedKey != "awg-psk" || shared.PublicKey != "pub-awg" || shared.KeepAlive != 25 {
+		t.Fatalf("test setup did not persist AmneziaWG last: allowedIPs=%q preSharedKey=%q publicKey=%q keepAlive=%d", shared.AllowedIPs, shared.PreSharedKey, shared.PublicKey, shared.KeepAlive)
+	}
+
+	peers := wgPeerList(t, wgInboundEmittedSettings(t, "wg-dual"))
+	if len(peers) != 1 {
+		t.Fatalf("expected 1 peer, got %d: %v", len(peers), peers)
+	}
+	allowed, ok := peers[0]["allowedIPs"].([]any)
+	if !ok || len(allowed) != 1 || allowed[0] != "10.0.0.5/32" {
+		t.Fatalf("WireGuard peer allowedIPs = %v, want [10.0.0.5/32]", peers[0]["allowedIPs"])
+	}
+	if peers[0]["preSharedKey"] != "wg-psk" {
+		t.Fatalf("WireGuard peer preSharedKey = %v, want wg-psk", peers[0]["preSharedKey"])
+	}
+	if peers[0]["publicKey"] != "pub-wg" {
+		t.Fatalf("WireGuard peer publicKey = %v, want pub-wg", peers[0]["publicKey"])
+	}
+	if peers[0]["keepAlive"] != float64(15) {
+		t.Fatalf("WireGuard peer keepAlive = %v, want 15", peers[0]["keepAlive"])
+	}
+}
+
+func TestGetXrayConfigWireGuardOmitsKeepAliveAbsentFromSettings(t *testing.T) {
+	email := seedDualTunnelClient(t, true, nil)
+
+	var shared model.ClientRecord
+	if err := database.GetDB().Where("email = ?", email).First(&shared).Error; err != nil {
+		t.Fatalf("read shared client: %v", err)
+	}
+	if shared.PublicKey != "pub-awg" || shared.KeepAlive != 25 {
+		t.Fatalf("test setup did not persist AmneziaWG identity: publicKey=%q keepAlive=%d", shared.PublicKey, shared.KeepAlive)
+	}
+
+	peers := wgPeerList(t, wgInboundEmittedSettings(t, "wg-dual"))
+	if len(peers) != 1 {
+		t.Fatalf("expected 1 peer, got %d: %v", len(peers), peers)
+	}
+	if peers[0]["publicKey"] != "pub-wg" {
+		t.Fatalf("WireGuard peer publicKey = %v, want pub-wg", peers[0]["publicKey"])
+	}
+	if _, ok := peers[0]["keepAlive"]; ok {
+		t.Fatalf("WireGuard peer keepAlive = %v, want absent", peers[0]["keepAlive"])
+	}
+}
+
+func TestGetXrayConfigWireGuardDisabledDualProtocolClientExcluded(t *testing.T) {
+	seedDualTunnelClient(t, false, model.KeepAlivePtr(15))
+
+	peers := wgPeerList(t, wgInboundEmittedSettings(t, "wg-dual"))
+	if len(peers) != 0 {
+		t.Fatalf("expected disabled dual-protocol client to be excluded, got %v", peers)
 	}
 }
 

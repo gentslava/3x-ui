@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mhsanaei/3x-ui/v3/internal/database"
+	"github.com/mhsanaei/3x-ui/v3/internal/database/dbtest"
 	"github.com/mhsanaei/3x-ui/v3/internal/database/model"
 )
 
@@ -12,10 +13,7 @@ func initClientHwidTestDB(t *testing.T) {
 	t.Helper()
 	dbDir := t.TempDir()
 	t.Setenv("XUI_DB_FOLDER", dbDir)
-	if err := database.InitDB(filepath.Join(dbDir, "x-ui.db")); err != nil {
-		t.Fatalf("InitDB: %v", err)
-	}
-	t.Cleanup(func() { _ = database.CloseDB() })
+	dbtest.InitDB(t, filepath.Join(dbDir, "x-ui.db"))
 }
 
 func seedHwidClient(t *testing.T, limit int) *model.ClientRecord {
@@ -44,6 +42,23 @@ func TestClientHwidGate(t *testing.T) {
 	}
 	if !res.Allowed || res.Active {
 		t.Fatalf("no limit should allow missing HWID without active headers: %+v", res)
+	}
+
+	for _, ua := range []string{"Happ/1.0", "Happ/2.0"} {
+		res, err = svc.EnforceHwidForSubID("sub-hwid", HwidRequest{Hwid: "device-one", UserAgent: ua})
+		if err != nil {
+			t.Fatalf("no-limit gate with HWID: %v", err)
+		}
+		if res != (HwidGateResult{Allowed: true}) {
+			t.Fatalf("no limit should allow HWID without active headers: %+v", res)
+		}
+	}
+	list, err := svc.ListClientHwids("hwid@example.com")
+	if err != nil {
+		t.Fatalf("list HWIDs: %v", err)
+	}
+	if len(list) != 1 || list[0].UserAgent != "Happ/2.0" {
+		t.Fatalf("no limit should still track one device with fresh metadata, got %+v", list)
 	}
 }
 
@@ -121,15 +136,22 @@ func TestClientHwidGateRegistersAndBlocks(t *testing.T) {
 	}
 	foundUpdated := false
 	for _, row := range list {
+		if len(row.Fingerprint) != hwidFingerprintLength {
+			t.Fatalf("fingerprint length = %d, want %d: %q", len(row.Fingerprint), hwidFingerprintLength, row.Fingerprint)
+		}
 		if row.DeviceModel == "updated-model" && row.UserAgent == "Karing/2.0" && row.DeviceOS == "ios" && row.OsVersion == "18" {
 			foundUpdated = true
+			want := hashHwid(firstRaw)[:hwidFingerprintLength]
+			if row.Fingerprint != want {
+				t.Fatalf("fingerprint = %q, want %q", row.Fingerprint, want)
+			}
 		}
 	}
 	if !foundUpdated {
 		t.Fatalf("updated HWID metadata missing: %#v", list)
 	}
 
-	if err := svc.setClientLimitHwidByEmail(nil, rec.Email, 1); err != nil {
+	if err := svc.setClientLimitHwidByEmail(rec.Email, 1); err != nil {
 		t.Fatalf("lower limit: %v", err)
 	}
 	var count int64
@@ -215,5 +237,63 @@ func TestClientHwidGateSharedSubIdUsesMaxLimit(t *testing.T) {
 	}
 	if res.Allowed || !res.NotSupported {
 		t.Fatalf("missing HWID should be denied: %+v", res)
+	}
+}
+
+func TestClientHwidSlotStatus(t *testing.T) {
+	initClientHwidTestDB(t)
+	svc := &ClientService{}
+	db := database.GetDB()
+	rec := seedHwidClient(t, 1)
+
+	status, found, err := svc.HwidSlotStatusForSubID("no-such-sub")
+	if err != nil || found || status != (HwidSlotStatus{}) {
+		t.Fatalf("unknown subId = (%+v, %v, %v), want zero status and found=false", status, found, err)
+	}
+
+	status, found, err = svc.HwidSlotStatusForSubID(" " + rec.SubID + " ")
+	if err != nil || !found {
+		t.Fatalf("padded subId = (%+v, %v, %v), want found=true", status, found, err)
+	}
+	if want := (HwidSlotStatus{Active: true, Limit: 1, Remaining: 1}); status != want {
+		t.Fatalf("empty slots = %+v, want %+v", status, want)
+	}
+
+	// A shared sub_id takes the highest limit, matching the enforcement gate.
+	if err := db.Create(&model.ClientRecord{Email: "second@example.com", SubID: rec.SubID, UUID: "22222222-2222-4333-8444-555555555555", Enable: true, LimitHwid: 3}).Error; err != nil {
+		t.Fatalf("seed second client: %v", err)
+	}
+	for _, hwid := range []string{"device-one", "device-two", "device-three"} {
+		if _, err := svc.EnforceHwidForSubID(rec.SubID, HwidRequest{Hwid: hwid}); err != nil {
+			t.Fatalf("register %s: %v", hwid, err)
+		}
+	}
+	status, found, err = svc.HwidSlotStatusForSubID(rec.SubID)
+	if err != nil || !found {
+		t.Fatalf("shared subId = (%+v, %v, %v), want found=true", status, found, err)
+	}
+	if want := (HwidSlotStatus{Active: true, Limit: 3, Registered: 3, Full: true}); status != want {
+		t.Fatalf("full slots = %+v, want %+v", status, want)
+	}
+
+	// Deleting the highest-limit client drops the effective limit below the
+	// registered count, and remaining must clamp at zero instead of going negative.
+	if err := db.Where("email = ?", "second@example.com").Delete(&model.ClientRecord{}).Error; err != nil {
+		t.Fatalf("delete second client: %v", err)
+	}
+	status, _, err = svc.HwidSlotStatusForSubID(rec.SubID)
+	if err != nil {
+		t.Fatalf("lowered limit: %v", err)
+	}
+	if want := (HwidSlotStatus{Active: true, Limit: 1, Registered: 3, Remaining: 0, Full: true}); status != want {
+		t.Fatalf("over-limit slots = %+v, want %+v", status, want)
+	}
+
+	if err := db.Model(&model.ClientRecord{}).Where("sub_id = ?", rec.SubID).UpdateColumn("enable", false).Error; err != nil {
+		t.Fatalf("disable clients: %v", err)
+	}
+	status, found, err = svc.HwidSlotStatusForSubID(rec.SubID)
+	if err != nil || found || status != (HwidSlotStatus{}) {
+		t.Fatalf("disabled subId = (%+v, %v, %v), want zero status and found=false", status, found, err)
 	}
 }
